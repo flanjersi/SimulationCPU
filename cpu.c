@@ -84,7 +84,7 @@ PSW cpu_JUMP(PSW m) {
 }
 
 PSW cpu_HALT(PSW m) {
-	m.IN = INST_HALT;
+	m.IN = INT_HALT;
 	return m;
 }
 
@@ -94,16 +94,15 @@ PSW cpu_HALT(PSW m) {
 ***********************************************************/
 
 PSW cpu(PSW m) {
-
-	/*** lecture et decodage de l'instruction ***/
-	if (m.PC < 0 || m.PC >= m.SS) {
-		m.IN = INT_SEGV;
-		return (m);
-	}
-	m.RI = decode_instruction(mem[m.PC + m.SB]);
-
-	/*** execution de l'instruction ***/
 	for(int i = 0 ; i < CPU_CLOCK ; i++){
+			/*** lecture et decodage de l'instruction ***/
+		if (m.PC < 0 || m.PC >= m.SS) {
+			m.IN = INT_SEGV;
+			return (m);
+		}
+		m.RI = decode_instruction(mem[m.PC + m.SB]);
+
+		/*** execution de l'instruction ***/
 		switch (m.RI.OP) {
 		case INST_ADD:
 			m = cpu_ADD(m);
