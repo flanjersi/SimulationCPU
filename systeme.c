@@ -20,7 +20,7 @@ static PSW systeme_init(void) {
 	make_inst(1, INST_ADD, 1, 2, 500);   /* R1 += R2+500 */
 	make_inst(2, INST_ADD, 0, 2, 200);   /* R0 += R2+200 */
 	make_inst(3, INST_ADD, 0, 1, 100);   /* R0 += R1+100 */
-	
+	//make_inst(4, 3, 0, 1, 100);
 	/*** valeur initiale du PSW ***/
 	memset (&cpu, 0, sizeof(cpu));
 	cpu.PC = 0;
@@ -30,6 +30,23 @@ static PSW systeme_init(void) {
 	return cpu;
 }
 
+/********************************************************
+** Affichage registre PC
+***********************************************************/
+
+void print_PC(PSW m){
+	printf("Program counter : %d\n", m.PC);
+}
+
+/********************************************************
+** Affichage registre DR
+***********************************************************/
+
+void print_DR(PSW m){
+	printf("Print data registers : \n");
+	for(int i = 0 ; i < 8 ; i++)
+		printf("  |--> DR[%d] = %d\n", i , m.DR[i]);
+}
 
 /**********************************************************
 ** Simulation du systeme (mode systeme)
@@ -44,6 +61,8 @@ PSW systeme(PSW m) {
 			exit(1);
 			break;
 		case INT_TRACE:
+			print_PC(m);
+			print_DR(m);
 			break;
 		case INT_INST:
 			exit(1);
