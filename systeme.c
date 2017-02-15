@@ -95,7 +95,9 @@ PSW systeme(PSW m) {
 			break;
 		case INT_INST:
 			exit(1);
-			break;
+		case INST_HALT:
+			printf("\n---Fin de programme --- \n");
+			exit(0);
 	}
 	return m;
 }
