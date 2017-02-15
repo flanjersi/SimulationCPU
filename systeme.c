@@ -43,7 +43,7 @@ PSW systeme_init_boucle(void) {
     make_inst( 3, INST_CMP,  R1, R2, 0);    /* AC = (R1 - R2)      */
     make_inst( 4, INST_IFGT,  0,  0, 11);   /* if (AC > 0) PC = 11 */
     make_inst( 5, INST_NOP,   0,  0, 0);    /* no operation        */
-    make_inst( 6, INST_NOP,   0,  0, 0);    /* no operation        */
+    make_inst( 6, INST_LOAD,   R2,  R3, 1);    /* no operation        */
     make_inst( 7, INST_NOP,   0,  0, 0);    /* no operation        */
     make_inst( 8, INST_ADD,  R1, R3, 0);    /* R1 += R3            */
     make_inst( 9, INST_SYSC,  R1,  0, SYSC_PUTI);    /* SYSCALL             */

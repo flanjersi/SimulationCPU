@@ -84,8 +84,8 @@ PSW cpu_JUMP(PSW m) {
 }
 
 PSW cpu_HALT(PSW m) {
-	//m.IN = INT_HALT;
-	m.PC += 1;
+	m.IN = INT_HALT;
+	//m.PC += 1;
 	return m;
 }
 
@@ -97,10 +97,12 @@ PSW cpu_SYSC(PSW m){
 
 PSW cpu_LOAD(PSW m){
 	m.AC = m.DR[m.RI.j] + m.RI.ARG;
+	
 	if(m.AC < 0 || m.AC >= m.SS){
 		m.IN = INT_SEGV;
 		return m;
 	}
+	
 	m.AC = mem[m.SB + m.AC];
 	m.DR[m.RI.i] = m.AC;
 	m.PC += 1;
@@ -135,8 +137,7 @@ PSW cpu(PSW m) {
 			break;
 		case INST_HALT:
 			m = cpu_HALT(m);
-			//return m;
-			break;
+			return m;
 		case INST_IFGT:
 			m = cpu_IFGT(m);
 			break;
@@ -148,7 +149,8 @@ PSW cpu(PSW m) {
 			return m;
 		case INST_LOAD:
 			m = cpu_LOAD(m);
-			break;
+			if(m.IN == INT_SEGV) return m;
+			else break;
 		default:
 			/*** interruption instruction inconnue ***/
 			m.IN = INT_INST;
