@@ -118,7 +118,7 @@ PSW cpu(PSW m) {
 		break;
 	case INST_HALT:
 		m = cpu_HALT(m);
-		break;
+		return m;
 	case INST_IFGT:
 		m = cpu_IFGT(m);
 		break;
