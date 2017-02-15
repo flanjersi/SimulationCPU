@@ -94,10 +94,10 @@ PSW systeme(PSW m) {
 			print_DR(m);
 			break;
 		case INT_INST:
-			exit(1);
+			exit(EXIT_FAILURE);
 		case INT_HALT:
 			printf("\n---Fin de programme --- \n");
-			exit(0);
+			exit(EXIT_SUCCESS);
 		case INT_CLOCK:
 			printf("\n------ CLOCK ------\n");
 			print_PC(m);
