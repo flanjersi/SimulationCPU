@@ -11,7 +11,7 @@
 #define INT_INST	(3)
 #define INT_TRACE	(4)
 #define INT_HALT    (5)
-
+#define INT_CLOCK   (6)
 
 /**********************************************************
 ** Codes associes aux instructions
