@@ -95,6 +95,17 @@ PSW cpu_SYSC(PSW m){
 	return m;
 }
 
+PSW cpu_LOAD(PSW m){
+	m.AC = m.DR[m.RI.j] + m.RI.ARG;
+	if(m.AC < 0 || m.AC >= m.SS){
+		m.IN = INT_SEGV;
+		return m;
+	}
+	m.AC = mem[m.SB + m.AC];
+	m.DR[m.RI.i] = m.AC;
+	m.PC += 1;
+	return m;
+}
 /**********************************************************
 ** Simulation de la CPU (mode utilisateur)
 ***********************************************************/
@@ -135,13 +146,16 @@ PSW cpu(PSW m) {
 		case INST_SYSC:
 			m = cpu_SYSC(m);
 			return m;
+		case INST_LOAD:
+			m = cpu_LOAD(m);
+			break;
 		default:
 			/*** interruption instruction inconnue ***/
 			m.IN = INT_INST;
 			return (m);
 		}
 	}
-	/*** interruption apres chaque CPU_CLOCK ***/
+	/*** interruption au bout de CPU_CLOCK instructions ***/
 	m.IN = INT_CLOCK;
 	return m;
 }
