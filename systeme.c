@@ -41,10 +41,12 @@ PSW systeme(PSW m) {
 		case INT_INIT:
 			return (systeme_init());
 		case INT_SEGV:
+			exit(1);
 			break;
 		case INT_TRACE:
 			break;
 		case INT_INST:
+			exit(1);
 			break;
 	}
 	return m;
