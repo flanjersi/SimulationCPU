@@ -19,6 +19,10 @@
 #define INST_ADD	(0)
 #define INST_SUB	(1)
 #define INST_CMP	(2)
+#define INST_IFGT   (3)
+#define INST_NOP    (4)
+#define INST_JUMP   (5)
+#define INST_HALT   (6)
 
 
 /**********************************************************
