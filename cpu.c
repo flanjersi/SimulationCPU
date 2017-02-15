@@ -67,6 +67,9 @@ PSW cpu_CMP(PSW m) {
 
 
 PSW cpu_IFGT(PSW m) {
+	if(m.AC > 0) m.PC = m.RI.ARG;
+	else m.PC += 1;
+	
 	return m;
 }
 
