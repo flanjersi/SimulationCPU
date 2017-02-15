@@ -1,4 +1,3 @@
-
 CFLAGS=-Wall -g
 HEADERS=$(wildcard *.h)
 
