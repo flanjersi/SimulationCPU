@@ -84,6 +84,7 @@ PSW cpu_JUMP(PSW m) {
 }
 
 PSW cpu_HALT(PSW m) {
+	m.IN = INST_HALT;
 	return m;
 }
 

@@ -10,6 +10,7 @@
 #define INT_SEGV	(2)
 #define INT_INST	(3)
 #define INT_TRACE	(4)
+#define INT_HALT    (5)
 
 
 /**********************************************************
