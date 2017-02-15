@@ -36,7 +36,7 @@ static PSW systeme_init(void) {
 ***********************************************************/
 
 PSW systeme(PSW m) {
-	printf("Interruption reçu : %d\n", m.IN);
+	printf("Received interrupt number : %d\n", m.IN);
 	switch (m.IN) {
 		case INT_INIT:
 			return (systeme_init());
