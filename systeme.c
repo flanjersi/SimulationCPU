@@ -103,6 +103,7 @@ PSW systeme(PSW m) {
 		case INT_INIT:
 			return (systeme_init_boucle());
 		case INT_SEGV:
+			printf("INT_SEGV error\n");
 			exit(1);
 			break;
 		case INT_TRACE:

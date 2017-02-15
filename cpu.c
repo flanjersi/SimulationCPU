@@ -84,7 +84,7 @@ PSW cpu_JUMP(PSW m) {
 }
 
 PSW cpu_HALT(PSW m) {
-	m.IN = INT_HALT;
+	//m.IN = INT_HALT;
 	m.PC += 1;
 	return m;
 }
@@ -124,7 +124,8 @@ PSW cpu(PSW m) {
 			break;
 		case INST_HALT:
 			m = cpu_HALT(m);
-			return m;
+			//return m;
+			break;
 		case INST_IFGT:
 			m = cpu_IFGT(m);
 			break;
