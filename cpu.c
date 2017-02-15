@@ -103,36 +103,37 @@ PSW cpu(PSW m) {
 	m.RI = decode_instruction(mem[m.PC + m.SB]);
 
 	/*** execution de l'instruction ***/
-	switch (m.RI.OP) {
-	case INST_ADD:
-		m = cpu_ADD(m);
-		break;
-	case INST_SUB:
-		m = cpu_SUB(m);
-		break;
-	case INST_CMP:
-		m = cpu_CMP(m);
-		break;
-	case INST_JUMP:
-		m = cpu_JUMP(m);
-		break;
-	case INST_HALT:
-		m = cpu_HALT(m);
-		return m;
-	case INST_IFGT:
-		m = cpu_IFGT(m);
-		break;
-	case INST_NOP:
-		m = cpu_NOP(m);
-		break;
-	default:
-		/*** interruption instruction inconnue ***/
-		m.IN = INT_INST;
-		return (m);
+	for(int i = 0 ; i < CPU_CLOCK ; i++){
+		switch (m.RI.OP) {
+		case INST_ADD:
+			m = cpu_ADD(m);
+			break;
+		case INST_SUB:
+			m = cpu_SUB(m);
+			break;
+		case INST_CMP:
+			m = cpu_CMP(m);
+			break;
+		case INST_JUMP:
+			m = cpu_JUMP(m);
+			break;
+		case INST_HALT:
+			m = cpu_HALT(m);
+			return m;
+		case INST_IFGT:
+			m = cpu_IFGT(m);
+			break;
+		case INST_NOP:
+			m = cpu_NOP(m);
+			break;
+		default:
+			/*** interruption instruction inconnue ***/
+			m.IN = INT_INST;
+			return (m);
+		}
 	}
-
-	/*** interruption apres chaque instruction ***/
-	m.IN = INT_TRACE;
+	/*** interruption apres chaque CPU_CLOCK ***/
+	m.IN = INT_CLOCK;
 	return m;
 }
 

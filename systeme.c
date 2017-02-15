@@ -48,7 +48,7 @@ PSW systeme_init_boucle(void) {
     make_inst( 8, INST_ADD,  R1, R3, 0);    /* R1 += R3            */
     make_inst( 9, INST_JUMP,  0,  0, 3);    /* PC = 3              */
     make_inst(10, INST_HALT,  0,  0, 0);    /* HALT                */
-        
+
     /*** valeur initiale du PSW ***/
     memset (&cpu, 0, sizeof(cpu));
     cpu.PC = 0;
@@ -98,6 +98,11 @@ PSW systeme(PSW m) {
 		case INST_HALT:
 			printf("\n---Fin de programme --- \n");
 			exit(0);
+		case INST_CLOCK:
+			printf("\n------ CLOCK ------\n");
+			print_PC(m);
+			print_DR(m);
+			break;
 	}
 	return m;
 }
