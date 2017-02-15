@@ -46,7 +46,7 @@ PSW systeme_init_boucle(void) {
     make_inst( 6, INST_NOP,   0,  0, 0);    /* no operation        */
     make_inst( 7, INST_NOP,   0,  0, 0);    /* no operation        */
     make_inst( 8, INST_ADD,  R1, R3, 0);    /* R1 += R3            */
-    make_inst( 9, INST_SYSC,  0,  0, 0);    /* SYSCALL             */
+    make_inst( 9, INST_SYSC,  R1,  0, SYSC_PUTI);    /* SYSCALL             */
     make_inst(10, INST_JUMP,  0,  0, 3);    /* PC = 3              */
     make_inst(11, INST_HALT,  0,  0, 0);    /* HALT                */
 
@@ -71,6 +71,7 @@ void print_PC(PSW m){
 ** Affichage registre DR
 ***********************************************************/
 
+
 void print_DR(PSW m){
 	printf("Print data registers : \n");
 	for(int i = 0 ; i < 8 ; i++)
@@ -78,12 +79,16 @@ void print_DR(PSW m){
 }
 
 void system_SYSC(PSW m){
-	switch(m.IR.ARG){
+	switch(m.RI.ARG){
 		case SYSC_EXIT:
+			printf("SYSC_EXIT : End of program\n");
 			exit(0);
 			break;
 		case SYSC_PUTI:
-			printf("SYSC_PUTI : Registre %d -> %d\n", m.IR.i, m.DR[m.IR.i]);
+			printf("SYSC_PUTI : R%d = %d\n", m.RI.i, m.DR[m.RI.i]);
+			break;
+		default:
+			printf("Unknown ARG of SYSC");
 			break;
 	}
 }
@@ -111,9 +116,6 @@ PSW systeme(PSW m) {
 			printf("\n---Fin de programme --- \n");
 			exit(EXIT_SUCCESS);
 		case INT_CLOCK:
-			printf("\n------ CLOCK ------\n");
-			print_PC(m);
-			print_DR(m);
 			break;
 		case INT_SYSC:
 			printf("\n------ SYSCALL ------\n");
