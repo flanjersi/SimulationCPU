@@ -66,6 +66,23 @@ PSW cpu_CMP(PSW m) {
 }
 
 
+PSW cpu_IFGT(PSW m) {
+	return m;
+}
+
+PSW cpu_NOP(PSW m) {
+	return m;
+}
+
+PSW cpu_JUMP(PSW m) {
+	return m;
+}
+
+PSW cpu_HALT(PSW m) {
+	return m;
+}
+
+
 /**********************************************************
 ** Simulation de la CPU (mode utilisateur)
 ***********************************************************/
