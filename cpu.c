@@ -69,7 +69,7 @@ PSW cpu_CMP(PSW m) {
 PSW cpu_IFGT(PSW m) {
 	if(m.AC > 0) m.PC = m.RI.ARG;
 	else m.PC += 1;
-	
+
 	return m;
 }
 
@@ -111,6 +111,18 @@ PSW cpu(PSW m) {
 		break;
 	case INST_CMP:
 		m = cpu_CMP(m);
+		break;
+	case INST_JUMP:
+		m = cpu_JUMP(m);
+		break;
+	case INST_HALT:
+		m = cpu_HALT(m);
+		break;
+	case INST_IFGT:
+		m = cpu_IFGT(m);
+		break;
+	case INST_NOP:
+		m = cpu_NOP(m);
 		break;
 	default:
 		/*** interruption instruction inconnue ***/
