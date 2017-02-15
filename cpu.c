@@ -80,8 +80,8 @@ PSW cpu_NOP(PSW m) {
 
 PSW cpu_JUMP(PSW m) {
 	m.PC = m.RI.ARG;
-	return m
-;}
+	return m;
+}
 
 PSW cpu_HALT(PSW m) {
 	return m;
