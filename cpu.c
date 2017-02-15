@@ -85,9 +85,15 @@ PSW cpu_JUMP(PSW m) {
 
 PSW cpu_HALT(PSW m) {
 	m.IN = INT_HALT;
+	m.PC += 1;
 	return m;
 }
 
+PSW cpu_SYSC(PSW m){
+	m.IN = INT_SYSC;
+	m.PC += 1;
+	return m;
+}
 
 /**********************************************************
 ** Simulation de la CPU (mode utilisateur)
@@ -125,6 +131,9 @@ PSW cpu(PSW m) {
 		case INST_NOP:
 			m = cpu_NOP(m);
 			break;
+		case INST_SYSC:
+			m = cpu_SYSC(m);
+			return m;
 		default:
 			/*** interruption instruction inconnue ***/
 			m.IN = INT_INST;
