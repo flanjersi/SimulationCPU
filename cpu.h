@@ -13,6 +13,7 @@
 #define INT_TRACE	(4)
 #define INT_HALT    (5)
 #define INT_CLOCK   (6)
+#define INT_SYSC    (7)
 
 /**********************************************************
 ** Codes associes aux instructions
@@ -25,6 +26,7 @@
 #define INST_NOP    (4)
 #define INST_JUMP   (5)
 #define INST_HALT   (6)
+#define INST_SYSC   (7)
 
 
 /**********************************************************

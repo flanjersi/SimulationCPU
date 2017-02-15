@@ -41,13 +41,14 @@ PSW systeme_init_boucle(void) {
     make_inst( 1, INST_ADD,  R2, R2, 10);   /* R2 = 1000           */
     make_inst( 2, INST_ADD,  R3, R3, 5);    /* R3 = 5              */
     make_inst( 3, INST_CMP,  R1, R2, 0);    /* AC = (R1 - R2)      */
-    make_inst( 4, INST_IFGT,  0,  0, 10);   /* if (AC > 0) PC = 10 */
+    make_inst( 4, INST_IFGT,  0,  0, 11);   /* if (AC > 0) PC = 11 */
     make_inst( 5, INST_NOP,   0,  0, 0);    /* no operation        */
     make_inst( 6, INST_NOP,   0,  0, 0);    /* no operation        */
     make_inst( 7, INST_NOP,   0,  0, 0);    /* no operation        */
     make_inst( 8, INST_ADD,  R1, R3, 0);    /* R1 += R3            */
-    make_inst( 9, INST_JUMP,  0,  0, 3);    /* PC = 3              */
-    make_inst(10, INST_HALT,  0,  0, 0);    /* HALT                */
+    make_inst( 9, INST_SYSC,  0,  0, 0);    /* SYSCALL             */
+    make_inst(10, INST_JUMP,  0,  0, 3);    /* PC = 3              */
+    make_inst(11, INST_HALT,  0,  0, 0);    /* HALT                */
 
     /*** valeur initiale du PSW ***/
     memset (&cpu, 0, sizeof(cpu));
@@ -103,6 +104,10 @@ PSW systeme(PSW m) {
 			print_PC(m);
 			print_DR(m);
 			break;
+		case INT_SYSC:
+			printf("\n------ SYSCALL ------\n");
+			break;
+
 	}
 	return m;
 }
