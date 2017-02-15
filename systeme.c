@@ -76,6 +76,17 @@ void print_DR(PSW m){
 		printf("  |--> DR[%d] = %d\n", i , m.DR[i]);
 }
 
+void system_SYSC(PSW m){
+	switch(m.IR.ARG){
+		case SYSC_EXIT:
+			exit(0);
+			break;
+		case SYSC_PUTI:
+			printf("SYSC_PUTI : Registre %d -> %d\n", m.IR.i, m.DR[m.IR.i]);
+			break;
+	}
+}
+
 /**********************************************************
 ** Simulation du systeme (mode systeme)
 ***********************************************************/
@@ -102,6 +113,9 @@ PSW systeme(PSW m) {
 			printf("\n------ CLOCK ------\n");
 			print_PC(m);
 			print_DR(m);
+			break;
+		case INT_SYSC:
+			system_SYSC(m);
 			break;
 	}
 	return m;
