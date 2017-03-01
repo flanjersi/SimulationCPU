@@ -16,25 +16,21 @@ static PSW systeme_init(void) {
 	const int R1 = 1, R2 = 2, R3 = 3;
 
 	printf("Booting.\n");
-	/*** creation d'un programme ***/
-//	make_inst(0, INST_ADD, 2, 2, 1000); /* R2 += R2 + 1000 */
-	// make_inst(1, INST_ADD, 1, 2, 500);   /* R1 += R2+500 */
-	// make_inst(2, INST_ADD, 0, 2, 200);   /* R0 += R2+200 */
-	// make_inst(3, INST_ADD, 0, 1, 100);   /* R0 += R1+100 */
-	//
+
 	/*** creation d'un programme2 ***/
 	make_inst( 0, INST_ADD,  R1, R1, 0);    /* R1 = 0              */
 	make_inst( 1, INST_ADD,  R2, R2, 100);   /* R2 = 1000           */
 	make_inst( 2, INST_ADD,  R3, R3, 5);    /* R3 = 5              */
 	make_inst( 3, INST_CMP,  R1, R2, 0);    /* AC = (R1 - R2)      */
-	make_inst( 4, INST_IFGT,  0,  0, 11);   /* if (AC > 0) PC = 11 */
+	make_inst( 4, INST_IFGT,  0,  0, 12);   /* if (AC > 0) PC = 11 */
 	make_inst( 5, INST_NOP,   0,  0, 0);    /* no operation        */
 	make_inst( 6, INST_LOAD,   R2,  R3, 1);    /* no operation        */
 	make_inst( 7, INST_NOP,   0,  0, 0);    /* no operation        */
 	make_inst( 8, INST_ADD,  R1, R3, 0);    /* R1 += R3            */
 	make_inst( 9, INST_SYSC,  R1,  0, SYSC_PUTI);    /* SYSCALL    */
-	make_inst(10, INST_JUMP,  0,  0, 3);    /* PC = 3              */
-	make_inst(11, INST_HALT,  0,  0, 0);    /* HALT                */
+	make_inst(10, INST_SYSC,  R1,  0, SYSC_NEWTHREAD);    /* SYSCALL    */
+    make_inst(11, INST_JUMP,  0,  0, 3);    /* PC = 3              */
+    make_inst(12, INST_HALT,  0,  0, 0);    /* HALT                */
 
 	/*** valeur initiale du PSW ***/
 	memset (&cpu, 0, sizeof(cpu));
@@ -76,8 +72,9 @@ PSW systeme_init_boucle(void) {
     make_inst( 7, INST_NOP,   0,  0, 0);    /* no operation        */
     make_inst( 8, INST_ADD,  R1, R3, 0);    /* R1 += R3            */
     make_inst( 9, INST_SYSC,  R1,  0, SYSC_PUTI);    /* SYSCALL    */
-    make_inst(10, INST_JUMP,  0,  0, 3);    /* PC = 3              */
-    make_inst(11, INST_HALT,  0,  0, 0);    /* HALT                */
+	make_inst(10, INST_SYSC,  R1,  0, SYSC_NEWTHREAD);    /* SYSCALL    */
+    make_inst(11, INST_JUMP,  0,  0, 3);    /* PC = 3              */
+    make_inst(12, INST_HALT,  0,  0, 0);    /* HALT                */
 
     /*** valeur initiale du PSW ***/
     memset (&cpu, 0, sizeof(cpu));
@@ -115,6 +112,9 @@ void system_SYSC(PSW m){
 		case SYSC_PUTI:
 			printf("ORDONNANCEUR : %d\n", current_process);
 			printf("SYSC_PUTI : R%d = %d\n", m.RI.i, m.DR[m.RI.i]);
+			break;
+		case SYSC_NEWTHREAD:
+			printf("New thread");
 			break;
 		default:
 			printf("Unknown ARG of SYSC");
