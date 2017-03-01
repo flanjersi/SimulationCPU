@@ -12,25 +12,31 @@ int current_process = -1;
 ***********************************************************/
 
 static PSW systeme_init(void) {
-	PSW cpu, cpu2;
+	PSW cpu;
 	const int R1 = 1, R2 = 2, R3 = 3;
 
 	printf("Booting.\n");
 
 	/*** creation d'un programme2 ***/
-	make_inst( 0, INST_ADD,  R1, R1, 0);    /* R1 = 0              */
-	make_inst( 1, INST_ADD,  R2, R2, 100);   /* R2 = 1000           */
-	make_inst( 2, INST_ADD,  R3, R3, 5);    /* R3 = 5              */
-	make_inst( 3, INST_CMP,  R1, R2, 0);    /* AC = (R1 - R2)      */
-	make_inst( 4, INST_IFGT,  0,  0, 12);   /* if (AC > 0) PC = 11 */
-	make_inst( 5, INST_NOP,   0,  0, 0);    /* no operation        */
-	make_inst( 6, INST_LOAD,   R2,  R3, 1);    /* no operation        */
-	make_inst( 7, INST_NOP,   0,  0, 0);    /* no operation        */
-	make_inst( 8, INST_ADD,  R1, R3, 0);    /* R1 += R3            */
-	make_inst( 9, INST_SYSC,  R1,  0, SYSC_PUTI);    /* SYSCALL    */
-	make_inst(10, INST_SYSC,  R1,  0, SYSC_NEWTHREAD);    /* SYSCALL    */
-    make_inst(11, INST_JUMP,  0,  0, 3);    /* PC = 3              */
-    make_inst(12, INST_HALT,  0,  0, 0);    /* HALT                */
+	/*** Exemple de création d'un thread ***/
+	make_inst( 0, INST_SYSC,  R1, R1, SYSC_NEW_THREAD);  /* créer un thread  */
+	make_inst( 1, INST_IFGT,   0,  0, 10);               /* le père va en 10 */
+
+	/*** code du fils ***/
+	make_inst( 2, INST_SUB,   R3, R3, -1000);            /* R3 = 1000    */
+	make_inst( 3, INST_SYSC,  R3,  0, SYSC_PUTI);        /* afficher R3  */
+	make_inst( 4, INST_NOP,   0,   0, 0);
+	make_inst( 5, INST_NOP,   0,   0, 0);
+	make_inst( 6, INST_NOP,   0,   0, 0);
+	make_inst( 7, INST_NOP,   0,   0, 0);
+	make_inst( 8, INST_NOP,   0,   0, 0);
+	make_inst( 9, INST_HALT,   0,   0, 0);
+
+	/*** code du père ***/
+	make_inst(10, INST_SUB,   R3, R3, -2000);           /* R3 = 2000     */
+	make_inst(11, INST_SYSC,  R3,  0, SYSC_PUTI);       /* afficher R3   */
+	make_inst(12, INST_SYSC,   0,  0, SYSC_EXIT);       /* fin du thread */
+
 
 	/*** valeur initiale du PSW ***/
 	memset (&cpu, 0, sizeof(cpu));
@@ -38,18 +44,15 @@ static PSW systeme_init(void) {
 	cpu.SB = 0;
 	cpu.SS = 20;
 
-	memset (&cpu2, 0, sizeof(cpu));
-	cpu2.PC = 0;
-	cpu2.SB = 0;
-	cpu2.SS = 20;
-
-
+	for(int i = 0 ; i < MAX_PROCESS ; i++){
+		process[i].state = EMPTY;
+	}
 	/*** Initialisation de premier processus ***/
 	memcpy(&(process[0].cpu), &cpu, sizeof(PSW));
-	process[0].state = EMPTY;
+	process[0].state = READY;
 
-	memcpy(&(process[1].cpu), &cpu2, sizeof(PSW));
-	process[1].state = READY;
+	//memcpy(&(process[1].cpu), &cpu2, sizeof(PSW));
+	//process[1].state = READY;
 
 	current_process = 0;
 	return process[0].cpu;
@@ -72,7 +75,7 @@ PSW systeme_init_boucle(void) {
     make_inst( 7, INST_NOP,   0,  0, 0);    /* no operation        */
     make_inst( 8, INST_ADD,  R1, R3, 0);    /* R1 += R3            */
     make_inst( 9, INST_SYSC,  R1,  0, SYSC_PUTI);    /* SYSCALL    */
-	make_inst(10, INST_SYSC,  R1,  0, SYSC_NEWTHREAD);    /* SYSCALL    */
+	make_inst(10, INST_SYSC,  R1,  0, SYSC_NEW_THREAD);    /* SYSCALL    */
     make_inst(11, INST_JUMP,  0,  0, 3);    /* PC = 3              */
     make_inst(12, INST_HALT,  0,  0, 0);    /* HALT                */
 
@@ -103,23 +106,12 @@ void print_DR(PSW m){
 		printf("  |--> DR[%d] = %d\n", i , m.DR[i]);
 }
 
-void system_SYSC(PSW m){
-	switch(m.RI.ARG){
-		case SYSC_EXIT:
-			printf("SYSC_EXIT : End of program\n");
-			exit(0);
-			break;
-		case SYSC_PUTI:
-			printf("ORDONNANCEUR : %d\n", current_process);
-			printf("SYSC_PUTI : R%d = %d\n", m.RI.i, m.DR[m.RI.i]);
-			break;
-		case SYSC_NEWTHREAD:
-			printf("New thread");
-			break;
-		default:
-			printf("Unknown ARG of SYSC");
-			break;
+int find_first_empty(){
+	for(int i = 0 ; i < MAX_PROCESS ; i++){
+		if(process[i].state == EMPTY)
+			return i;
 	}
+	return -1;
 }
 
 /**********************************************************
@@ -129,16 +121,44 @@ void system_SYSC(PSW m){
 PSW ordonnanceur(PSW m){
 	if(current_process != -1){
 		memcpy(&(process[current_process].cpu), &m, sizeof(PSW));
-		process[current_process].state = READY;
 	}
 
 	do{
 		current_process = (current_process + 1) % MAX_PROCESS;
 	}while(process[current_process].state != READY);
 
-	process[current_process].state = EMPTY;
 	return process[current_process].cpu;
 }
+
+PSW system_SYSC(PSW m){
+	int index;
+	switch(m.RI.ARG){
+		case SYSC_EXIT:
+			printf("SYSC_EXIT : End of process\n");
+			process[current_process].state = EMPTY;
+			return ordonnanceur(m);
+		case SYSC_PUTI:
+			printf("SYSC_PUTI : R%d = %d\n", m.RI.i, m.DR[m.RI.i]);
+			break;
+		case SYSC_NEW_THREAD:
+			index = find_first_empty();
+			printf("Thread créé : %d\n", index);
+			m.DR[m.RI.i] = index;
+			m.AC = index;
+
+			process[index].cpu = m;
+			process[index].cpu.DR[m.RI.i] = 0;
+			process[index].cpu.AC = 0;
+			process[index].state = READY;
+			break;
+		default:
+			printf("Unknown ARG of SYSC");
+			break;
+	}
+
+	return m;
+}
+
 
 /**********************************************************
 ** Simulation du systeme (mode systeme)
@@ -168,7 +188,7 @@ PSW systeme(PSW m) {
 			break;
 		case INT_SYSC:
 			printf("\n------ SYSCALL ------\n");
-			system_SYSC(m);
+			return system_SYSC(m);
 			break;
 	}
 	return m;
