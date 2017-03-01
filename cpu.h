@@ -37,6 +37,15 @@ typedef int WORD;         /* un mot est un entier 32 bits  */
 
 extern WORD mem[128];     /* memoire                       */
 
+/**********************************************************
+** Table des processus
+***********************************************************/
+
+#define MAX_PROCESS  (20)   /* nb maximum de processus  */
+
+#define EMPTY         (0)   /* processus non-pret       */
+#define READY         (1)   /* processus pret           */
+
 
 /**********************************************************
 ** Codage d'une instruction (32 bits)
@@ -63,6 +72,18 @@ typedef struct PSW {    /* Processor Status Word */
 	WORD AC;        /* Accumulateur */
 	INST RI;        /* Registre instruction */
 } PSW;
+
+
+/**********************************************************
+** Table des processus
+***********************************************************/
+
+struct {
+    PSW  cpu;               /* mot d'etat du processeur */
+    int  state;             /* etat du processus        */
+} process[MAX_PROCESS];   /* table des processus      */
+
+int current_process = -1;   /* nu du processus courant  */
 
 
 /**********************************************************

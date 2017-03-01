@@ -21,12 +21,17 @@ static PSW systeme_init(void) {
 	make_inst(2, INST_ADD, 0, 2, 200);   /* R0 += R2+200 */
 	make_inst(3, INST_ADD, 0, 1, 100);   /* R0 += R1+100 */
 	//make_inst(4, 3, 0, 1, 100);
+
 	/*** valeur initiale du PSW ***/
 	memset (&cpu, 0, sizeof(cpu));
 	cpu.PC = 0;
 	cpu.SB = 0;
 	cpu.SS = 20;
 
+	/*** Initialisation de premier processus ***/
+	memset(&(process[0].cpu), 0,  sizeof(cpu));
+	process[0].state = EMPTY;
+	current_process = 0;
 	return cpu;
 }
 
@@ -46,7 +51,7 @@ PSW systeme_init_boucle(void) {
     make_inst( 6, INST_LOAD,   R2,  R3, 1);    /* no operation        */
     make_inst( 7, INST_NOP,   0,  0, 0);    /* no operation        */
     make_inst( 8, INST_ADD,  R1, R3, 0);    /* R1 += R3            */
-    make_inst( 9, INST_SYSC,  R1,  0, SYSC_PUTI);    /* SYSCALL             */
+    make_inst( 9, INST_SYSC,  R1,  0, SYSC_PUTI);    /* SYSCALL    */
     make_inst(10, INST_JUMP,  0,  0, 3);    /* PC = 3              */
     make_inst(11, INST_HALT,  0,  0, 0);    /* HALT                */
 
@@ -97,6 +102,21 @@ void system_SYSC(PSW m){
 ** Simulation du systeme (mode systeme)
 ***********************************************************/
 
+PSW ordonnanceur(PSW m){
+	process[current_process].cpu = m;
+	process[current_process].state = EMPTY;
+
+	do{
+		current_process = (current_process + 1) % MAX_PROCESS;
+	}while(process[current_process].state != READY);
+
+	return process[current_process].cpu;
+}
+
+/**********************************************************
+** Simulation du systeme (mode systeme)
+***********************************************************/
+
 PSW systeme(PSW m) {
 	//printf("Received interrupt number : %d\n", m.IN);
 	switch (m.IN) {
@@ -117,6 +137,7 @@ PSW systeme(PSW m) {
 			printf("\n---Fin de programme --- \n");
 			exit(EXIT_SUCCESS);
 		case INT_CLOCK:
+			return ordonnanceur(m);
 			break;
 		case INT_SYSC:
 			printf("\n------ SYSCALL ------\n");
