@@ -28,6 +28,7 @@
 #define INST_HALT   (6)
 #define INST_SYSC   (7)
 #define INST_LOAD   (8)
+#define INST_STORE  (9)
 
 /**********************************************************
 ** definition d'un mot memoire

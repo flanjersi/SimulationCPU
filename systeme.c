@@ -23,9 +23,9 @@ static PSW systeme_init(void) {
 	make_inst( 1, INST_IFGT,   0,  0, 10);               /* le père va en 10 */
 
 	/*** code du fils ***/
-	make_inst( 2, INST_SUB,   R3, R3, -1000);            /* R3 = 1000    */
+	make_inst( 2, INST_LOAD,  R3, 0, 0);            /* R3 = 1000    */
 	make_inst( 3, INST_SYSC,  R3,  0, SYSC_PUTI);        /* afficher R3  */
-	make_inst( 4, INST_NOP,   0,   0, 0);
+	make_inst( 4, INST_NOP, 0,  0, 0);
 	make_inst( 5, INST_NOP,   0,   0, 0);
 	make_inst( 6, INST_NOP,   0,   0, 0);
 	make_inst( 7, INST_NOP,   0,   0, 0);
@@ -33,8 +33,8 @@ static PSW systeme_init(void) {
 	make_inst( 9, INST_HALT,   0,   0, 0);
 
 	/*** code du père ***/
-	make_inst(10, INST_SUB,   R3, R3, -2000);           /* R3 = 2000     */
-	make_inst(11, INST_SYSC,  R3,  0, SYSC_PUTI);       /* afficher R3   */
+	make_inst(10, INST_SUB, R3, R3, -3000);           /* R3 = 2000     */
+	make_inst(11, INST_STORE, R3,  0, 0);       /* afficher R3   */
 	make_inst(12, INST_SYSC,   0,  0, SYSC_EXIT);       /* fin du thread */
 
 

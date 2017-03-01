@@ -107,6 +107,21 @@ PSW cpu_LOAD(PSW m){
 	m.PC += 1;
 	return m;
 }
+
+PSW cpu_STORE(PSW m){
+	m.AC = m.DR[m.RI.j] + m.RI.ARG;
+
+	if(m.AC < 0 || m.AC >= m.SS){
+		m.IN = INT_SEGV;
+		return m;
+	}
+
+	mem[m.SB + m.AC] = m.DR[m.RI.i];
+	m.AC = m.DR[m.RI.i];
+	m.PC += 1;
+
+	return m;
+}
 /**********************************************************
 ** Simulation de la CPU (mode utilisateur)
 ***********************************************************/
@@ -147,6 +162,10 @@ PSW cpu(PSW m) {
 			return m;
 		case INST_LOAD:
 			m = cpu_LOAD(m);
+			if(m.IN == INT_SEGV) return m;
+			else break;
+		case INST_STORE:
+			m = cpu_STORE(m);
 			if(m.IN == INT_SEGV) return m;
 			else break;
 		default:
