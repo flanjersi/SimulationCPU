@@ -13,14 +13,23 @@ int current_process = -1;
 
 static PSW systeme_init(void) {
 	PSW cpu;
+	const int R1 = 1, R2 = 2, R3 = 3;
 
 	printf("Booting.\n");
 	/*** creation d'un programme ***/
-	make_inst(0, INST_SUB, 2, 2, -1000); /* R2 -= R2-1000 */
-	make_inst(1, INST_ADD, 1, 2, 500);   /* R1 += R2+500 */
-	make_inst(2, INST_ADD, 0, 2, 200);   /* R0 += R2+200 */
-	make_inst(3, INST_ADD, 0, 1, 100);   /* R0 += R1+100 */
-	//make_inst(4, 3, 0, 1, 100);
+
+	make_inst( 0, INST_ADD,  R1, R1, 0);    /* R1 = 0              */
+	make_inst( 1, INST_ADD,  R2, R2, 10);   /* R2 = 1000           */
+	make_inst( 2, INST_ADD,  R3, R3, 5);    /* R3 = 5              */
+	make_inst( 3, INST_CMP,  R1, R2, 0);    /* AC = (R1 - R2)      */
+	make_inst( 4, INST_IFGT,  0,  0, 11);   /* if (AC > 0) PC = 11 */
+	make_inst( 5, INST_NOP,   0,  0, 0);    /* no operation        */
+	make_inst( 6, INST_LOAD,   R2,  R3, 1);    /* no operation        */
+	make_inst( 7, INST_NOP,   0,  0, 0);    /* no operation        */
+	make_inst( 8, INST_ADD,  R1, R3, 0);    /* R1 += R3            */
+	make_inst( 9, INST_SYSC,  R1,  0, SYSC_PUTI);    /* SYSCALL    */
+	make_inst(10, INST_JUMP,  0,  0, 3);    /* PC = 3              */
+	make_inst(11, INST_HALT,  0,  0, 0);    /* HALT                */
 
 	/*** valeur initiale du PSW ***/
 	memset (&cpu, 0, sizeof(cpu));
@@ -29,9 +38,10 @@ static PSW systeme_init(void) {
 	cpu.SS = 20;
 
 	/*** Initialisation de premier processus ***/
-	memset(&(process[0].cpu), 0,  sizeof(cpu));
+	memcpy(&(process[0].cpu), &cpu, sizeof(PSW));
 	process[0].state = READY;
-	return cpu;
+	current_process = 0;
+	return process[0].cpu;
 }
 
 PSW systeme_init_boucle(void) {
@@ -102,14 +112,14 @@ void system_SYSC(PSW m){
 
 PSW ordonnanceur(PSW m){
 	if(current_process != -1){
-		process[current_process].cpu = m;
-		process[current_process].state = EMPTY;
+		memcpy(&(process[current_process].cpu), &m, sizeof(PSW));
+		process[current_process].state = READY;
 	}
 
 	do{
 		current_process = (current_process + 1) % MAX_PROCESS;
 	}while(process[current_process].state != READY);
-
+	printf("ORDONNANCEUR : %d\n", current_process);
 	return process[current_process].cpu;
 }
 
