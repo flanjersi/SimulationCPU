@@ -97,12 +97,12 @@ PSW cpu_SYSC(PSW m){
 
 PSW cpu_LOAD(PSW m){
 	m.AC = m.DR[m.RI.j] + m.RI.ARG;
-	
+
 	if(m.AC < 0 || m.AC >= m.SS){
 		m.IN = INT_SEGV;
 		return m;
 	}
-	
+
 	m.AC = mem[m.SB + m.AC];
 	m.DR[m.RI.i] = m.AC;
 	m.PC += 1;
@@ -161,6 +161,3 @@ PSW cpu(PSW m) {
 	m.IN = INT_CLOCK;
 	return m;
 }
-
-
-

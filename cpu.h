@@ -78,12 +78,13 @@ typedef struct PSW {    /* Processor Status Word */
 ** Table des processus
 ***********************************************************/
 
+
 struct {
     PSW  cpu;               /* mot d'etat du processeur */
     int  state;             /* etat du processus        */
 } process[MAX_PROCESS];   /* table des processus      */
 
-int current_process = -1;   /* nu du processus courant  */
+extern int current_process;   /* nu du processus courant  */
 
 
 /**********************************************************

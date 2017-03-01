@@ -6,7 +6,7 @@
 #include "cpu.h"
 #include "systeme.h"
 
-
+int current_process = -1;
 /**********************************************************
 ** Demarrage du systeme
 ***********************************************************/
@@ -30,8 +30,7 @@ static PSW systeme_init(void) {
 
 	/*** Initialisation de premier processus ***/
 	memset(&(process[0].cpu), 0,  sizeof(cpu));
-	process[0].state = EMPTY;
-	current_process = 0;
+	process[0].state = READY;
 	return cpu;
 }
 
@@ -60,7 +59,6 @@ PSW systeme_init_boucle(void) {
     cpu.PC = 0;
     cpu.SB = 0;
     cpu.SS = 20;
-
     return cpu;
 }
 
@@ -103,8 +101,10 @@ void system_SYSC(PSW m){
 ***********************************************************/
 
 PSW ordonnanceur(PSW m){
-	process[current_process].cpu = m;
-	process[current_process].state = EMPTY;
+	if(current_process != -1){
+		process[current_process].cpu = m;
+		process[current_process].state = EMPTY;
+	}
 
 	do{
 		current_process = (current_process + 1) % MAX_PROCESS;
@@ -121,7 +121,7 @@ PSW systeme(PSW m) {
 	//printf("Received interrupt number : %d\n", m.IN);
 	switch (m.IN) {
 		case INT_INIT:
-			return (systeme_init_boucle());
+			return (systeme_init());
 		case INT_SEGV:
 			printf("INT_SEGV error\n");
 			exit(1);
