@@ -12,14 +12,19 @@ int current_process = -1;
 ***********************************************************/
 
 static PSW systeme_init(void) {
-	PSW cpu;
+	PSW cpu, cpu2;
 	const int R1 = 1, R2 = 2, R3 = 3;
 
 	printf("Booting.\n");
 	/*** creation d'un programme ***/
-
+//	make_inst(0, INST_ADD, 2, 2, 1000); /* R2 += R2 + 1000 */
+	// make_inst(1, INST_ADD, 1, 2, 500);   /* R1 += R2+500 */
+	// make_inst(2, INST_ADD, 0, 2, 200);   /* R0 += R2+200 */
+	// make_inst(3, INST_ADD, 0, 1, 100);   /* R0 += R1+100 */
+	//
+	/*** creation d'un programme2 ***/
 	make_inst( 0, INST_ADD,  R1, R1, 0);    /* R1 = 0              */
-	make_inst( 1, INST_ADD,  R2, R2, 10);   /* R2 = 1000           */
+	make_inst( 1, INST_ADD,  R2, R2, 100);   /* R2 = 1000           */
 	make_inst( 2, INST_ADD,  R3, R3, 5);    /* R3 = 5              */
 	make_inst( 3, INST_CMP,  R1, R2, 0);    /* AC = (R1 - R2)      */
 	make_inst( 4, INST_IFGT,  0,  0, 11);   /* if (AC > 0) PC = 11 */
@@ -37,9 +42,19 @@ static PSW systeme_init(void) {
 	cpu.SB = 0;
 	cpu.SS = 20;
 
+	memset (&cpu2, 0, sizeof(cpu));
+	cpu2.PC = 0;
+	cpu2.SB = 0;
+	cpu2.SS = 20;
+
+
 	/*** Initialisation de premier processus ***/
 	memcpy(&(process[0].cpu), &cpu, sizeof(PSW));
-	process[0].state = READY;
+	process[0].state = EMPTY;
+
+	memcpy(&(process[1].cpu), &cpu2, sizeof(PSW));
+	process[1].state = READY;
+
 	current_process = 0;
 	return process[0].cpu;
 }
@@ -98,6 +113,7 @@ void system_SYSC(PSW m){
 			exit(0);
 			break;
 		case SYSC_PUTI:
+			printf("ORDONNANCEUR : %d\n", current_process);
 			printf("SYSC_PUTI : R%d = %d\n", m.RI.i, m.DR[m.RI.i]);
 			break;
 		default:
@@ -119,7 +135,8 @@ PSW ordonnanceur(PSW m){
 	do{
 		current_process = (current_process + 1) % MAX_PROCESS;
 	}while(process[current_process].state != READY);
-	printf("ORDONNANCEUR : %d\n", current_process);
+
+	process[current_process].state = EMPTY;
 	return process[current_process].cpu;
 }
 
