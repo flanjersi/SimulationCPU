@@ -46,6 +46,7 @@ extern WORD mem[128];     /* memoire                       */
 
 #define EMPTY         (0)   /* processus non-pret       */
 #define READY         (1)   /* processus pret           */
+#define SLEEP					(2)		/* processus endormi */
 
 
 /**********************************************************
@@ -85,8 +86,14 @@ struct {
     int  state;             /* etat du processus        */
 } process[MAX_PROCESS];   /* table des processus      */
 
+struct {
+    int id_process;
+		time_t wake_up;             /* etat du processus        */
+} sleeping_process[MAX_PROCESS];
+
 extern int current_process;   /* nu du processus courant  */
 extern int nbr_process_alive;
+extern int nbr_process_sleeping;
 
 /**********************************************************
 ** implanter une instruction en memoire

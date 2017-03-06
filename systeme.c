@@ -2,23 +2,19 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
+#include <time.h>
 #include "cpu.h"
 #include "systeme.h"
 
 int current_process = -1;
 int nbr_process_alive = 0;
+int nbr_process_sleeping = 0;
 /**********************************************************
 ** Demarrage du systeme
 ***********************************************************/
-
-static PSW systeme_init(void) {
-	PSW cpu;
+void make_inst_multi_thread_store(){
 	const int R1 = 1, R2 = 2, R3 = 3;
 
-	printf("Booting.\n");
-
-	/*** creation d'un programme2 ***/
 	/*** Exemple de création d'un thread ***/
 	make_inst( 0, INST_SYSC,  R1, R1, SYSC_NEW_THREAD);  /* créer un thread  */
 	make_inst( 1, INST_IFGT,   0,  0, 10);               /* le père va en 10 */
@@ -37,8 +33,41 @@ static PSW systeme_init(void) {
 	make_inst(10, INST_SUB, R3, R3, -3000);           /* R3 = 2000     */
 	make_inst(11, INST_STORE, R3,  0, 0);       /* afficher R3   */
 	make_inst(12, INST_SYSC,   0,  0, SYSC_EXIT);       /* fin du thread */
+}
+
+void make_inst_multi_thread(){
+	const int R1 = 1, R2 = 2, R3 = 3;
+
+		/*** Exemple de création d'un thread ***/
+	make_inst( 0, INST_SYSC,  R1, R1, SYSC_NEW_THREAD);  /* créer un thread  */
+	make_inst( 1, INST_IFGT,   0,  0, 10);               /* le père va en 10 */
+
+	/*** code du fils ***/
+	make_inst( 2, INST_SUB,   R3, R3, -1000);            /* R3 = 1000    */
+	make_inst( 3, INST_SYSC,  R3,  0, SYSC_PUTI);        /* afficher R3  */
+	make_inst( 4, INST_NOP,   0,   0, 0);
+	make_inst( 5, INST_NOP,   0,   0, 0);
+	make_inst( 6, INST_NOP,   0,   0, 0);
+	make_inst( 7, INST_NOP,   0,   0, 0);
+	make_inst( 8, INST_NOP,   0,   0, 0);
+	make_inst( 9, INST_NOP,   0,   0, 0);
+
+	/*** code du père ***/
+	make_inst(10, INST_SUB,   R3, R3, -2000);           /* R3 = 2000     */
+	make_inst(11, INST_SYSC,  R3,  0, SYSC_PUTI);       /* afficher R3   */
+	make_inst(12, INST_SYSC,   0,  0, SYSC_EXIT);       /* fin du thread */
+}
 
 
+
+static PSW systeme_init(void) {
+	PSW cpu;
+
+	printf("Booting.\n");
+
+	/*** creation d'un programme2 ***/
+	make_inst_multi_thread();
+	//make_inst_multi_thread_store();
 	/*** valeur initiale du PSW ***/
 	memset (&cpu, 0, sizeof(cpu));
 	cpu.PC = 0;
@@ -48,13 +77,21 @@ static PSW systeme_init(void) {
 	for(int i = 0 ; i < MAX_PROCESS ; i++){
 		process[i].state = EMPTY;
 	}
-	/*** Initialisation de premier processus ***/
-	memcpy(&(process[0].cpu), &cpu, sizeof(PSW));
+	/*** Initialisation processus idle ***/
 	process[0].state = READY;
+	process[0].cpu.PC = 0;
+	process[0].cpu.SB = 0;
+	process[0].cpu.SS = 20;
 	nbr_process_alive++;
 
-	current_process = 0;
-	return process[0].cpu;
+
+	/*** Initialisation de premier processus ***/
+	memcpy(&(process[1].cpu), &cpu, sizeof(PSW));
+	process[1].state = READY;
+	nbr_process_alive++;
+
+	current_process = 1;
+	return process[1].cpu;
 }
 
 PSW systeme_init_boucle(void) {
@@ -143,6 +180,17 @@ PSW new_thread(PSW m){
 	return m;
 }
 
+
+PSW sleeping_thread(PSW m){
+	sleeping_process[nbr_process_sleeping].id_process = current_process;
+	sleeping_process[nbr_process_sleeping].wake_up = time(NULL) + m.DR[m.RI.i];
+
+	process[current_process].state = SLEEP;
+
+	return ordonnanceur(m);
+}
+
+
 PSW system_SYSC(PSW m){
 	switch(m.RI.ARG){
 		case SYSC_EXIT:
@@ -154,6 +202,8 @@ PSW system_SYSC(PSW m){
 			break;
 		case SYSC_NEW_THREAD:
 			return new_thread(m);
+		case SYSC_SLEEP:
+			return sleeping_thread(m);
 		default:
 			printf("Unknown ARG of SYSC");
 			break;
