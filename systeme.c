@@ -7,6 +7,7 @@
 #include "systeme.h"
 
 int current_process = -1;
+int nbr_process_alive = 0;
 /**********************************************************
 ** Demarrage du systeme
 ***********************************************************/
@@ -50,9 +51,7 @@ static PSW systeme_init(void) {
 	/*** Initialisation de premier processus ***/
 	memcpy(&(process[0].cpu), &cpu, sizeof(PSW));
 	process[0].state = READY;
-
-	//memcpy(&(process[1].cpu), &cpu2, sizeof(PSW));
-	//process[1].state = READY;
+	nbr_process_alive++;
 
 	current_process = 0;
 	return process[0].cpu;
@@ -75,7 +74,7 @@ PSW systeme_init_boucle(void) {
     make_inst( 7, INST_NOP,   0,  0, 0);    /* no operation        */
     make_inst( 8, INST_ADD,  R1, R3, 0);    /* R1 += R3            */
     make_inst( 9, INST_SYSC,  R1,  0, SYSC_PUTI);    /* SYSCALL    */
-	make_inst(10, INST_SYSC,  R1,  0, SYSC_NEW_THREAD);    /* SYSCALL    */
+	  make_inst(10, INST_SYSC,  R1,  0, SYSC_NEW_THREAD);    /* SYSCALL    */
     make_inst(11, INST_JUMP,  0,  0, 3);    /* PC = 3              */
     make_inst(12, INST_HALT,  0,  0, 0);    /* HALT                */
 
@@ -130,8 +129,21 @@ PSW ordonnanceur(PSW m){
 	return process[current_process].cpu;
 }
 
+PSW new_thread(PSW m){
+	int index = find_first_empty();
+	printf("Thread créé : %d\n", index);
+	m.DR[m.RI.i] = index;
+	m.AC = index;
+
+	process[index].cpu = m;
+	process[index].cpu.DR[m.RI.i] = 0;
+	process[index].cpu.AC = 0;
+	process[index].state = READY;
+	nbr_process_alive++;
+	return m;
+}
+
 PSW system_SYSC(PSW m){
-	int index;
 	switch(m.RI.ARG){
 		case SYSC_EXIT:
 			printf("SYSC_EXIT : End of process\n");
@@ -141,16 +153,7 @@ PSW system_SYSC(PSW m){
 			printf("SYSC_PUTI : R%d = %d\n", m.RI.i, m.DR[m.RI.i]);
 			break;
 		case SYSC_NEW_THREAD:
-			index = find_first_empty();
-			printf("Thread créé : %d\n", index);
-			m.DR[m.RI.i] = index;
-			m.AC = index;
-
-			process[index].cpu = m;
-			process[index].cpu.DR[m.RI.i] = 0;
-			process[index].cpu.AC = 0;
-			process[index].state = READY;
-			break;
+			return new_thread(m);
 		default:
 			printf("Unknown ARG of SYSC");
 			break;

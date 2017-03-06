@@ -86,7 +86,7 @@ struct {
 } process[MAX_PROCESS];   /* table des processus      */
 
 extern int current_process;   /* nu du processus courant  */
-
+extern int nbr_process_alive;
 
 /**********************************************************
 ** implanter une instruction en memoire
