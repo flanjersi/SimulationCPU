@@ -10,12 +10,24 @@ int current_process = -1;
 int nbr_process_alive = 0;
 int nbr_process_sleeping = 0;
 int first_pc = -1;
+char tampon = '\0';
 
 /**********************************************************
 ** Programmes test
 ***********************************************************/
 
-void make_inst_sleep_process(){
+void make_inst_test_getchar(){
+	const int R3 = 3, R4 = 4;
+
+	/*** Lecture d'un caractère et endormissement ***/
+	make_inst( 0, INST_SUB,   R3, R3, -1);           /* R3 = 1         */
+	make_inst( 1, INST_SYSC,  R4,  0, SYSC_GETCHAR); /* R4 = getchar() */
+	make_inst( 2, INST_SYSC,  R4,  0, SYSC_PUTI);    /* puti(R4)       */
+	make_inst( 3, INST_SYSC,  R3,  0, SYSC_SLEEP);   /* sleep(R3)      */
+	make_inst( 4, INST_JUMP,   0,  0, 1);            /* go to 1        */
+}
+
+void make_inst_test_sleep(){
 	const int R1 = 1, R2 = 2, R3 = 3, R7 = 7;
 
 	/*** Exemple de création d'un thread ***/
@@ -42,7 +54,7 @@ void make_inst_sleep_process(){
 
 
 
-void make_inst_multi_thread_store(){
+void make_inst_test_thread(){
 	const int R1 = 1, R2 = 2, R3 = 3;
 
 	/*** Exemple de création d'un thread ***/
@@ -98,8 +110,9 @@ static PSW systeme_init(void) {
 	printf("Booting.\n");
 
 	/*** creation d'un programme ***/
-	//make_inst_multi_thread(); //make_inst_multi_thread_store();
-  make_inst_sleep_process();
+	//make_inst_multi_thread(); //make_inst_test_thread();
+  	make_inst_test_sleep();
+
 	/*** valeur initiale du PSW ***/
 	memset (&cpu, 0, sizeof(cpu));
 	cpu.PC = first_pc;
@@ -184,10 +197,9 @@ int find_first_empty(){
 ** Simulation du systeme (mode systeme)
 ***********************************************************/
 void reveil(){
-	time_t current_time = time(NULL);
 	for(int i = 0 ; i < MAX_PROCESS ; i++){
 		if(process[i].state == SLEEP){
-			if(process[i].wake_up <= current_time){
+			if(process[i].wake_up <= time(NULL)){
 				process[i].state = READY;
 				nbr_process_alive++;
 				nbr_process_sleeping--;
@@ -232,6 +244,27 @@ PSW send_thread_to_sleep(PSW m){
 	return ordonnanceur(m);
 }
 
+void frappe_clavier(){
+	time_t prochain_appel = time(NULL) + 4;
+	tampon = 'c';
+	for(int i = 0 ; i < MAX_PROCESS ; i++){
+		if(process[i].state == GETCHAR){
+			process[i].state = READY;
+			return;
+		}
+	}
+}
+
+PSW my_getchar(PSW m){
+	if(tampon == '\0'){
+		process[current_process].state = GETCHAR;
+		return ordonnanceur(m);
+	}
+	else{
+		m.DR[m.RI.i] = tampon;
+		return m;
+	}
+}
 
 PSW system_SYSC(PSW m){
 	switch(m.RI.ARG){
@@ -241,7 +274,7 @@ PSW system_SYSC(PSW m){
 			return ordonnanceur(m);
 		case SYSC_PUTI:
 			printf("SYSC_PUTI : R%d = %d\n", m.RI.i, m.DR[m.RI.i]);
-			break; ordonnanceur(m);
+			break;
 		case SYSC_NEW_THREAD:
 			return new_thread(m);
 		case SYSC_SLEEP:
@@ -250,8 +283,11 @@ PSW system_SYSC(PSW m){
 		case SYSC_IDLE:
 			printf("SYSC_IDLE\n");
 			break;
+		case SYSC_GETCHAR:
+			printf("SYSC_GETCHAR\n");
+			return my_getchar(m);
 		default:
-			printf("Unknown ARG of SYSC");
+			printf("Unknown ARG of SYSC\n");
 			break;
 	}
 

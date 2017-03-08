@@ -47,6 +47,7 @@ extern WORD mem[128];     /* memoire                       */
 #define EMPTY         (0)   /* processus non-pret       */
 #define READY         (1)   /* processus pret           */
 #define SLEEP	      (2)	/* processus endormi 		*/
+#define GETCHAR       (3)   /* endormi en attente de caractere */
 
 
 /**********************************************************

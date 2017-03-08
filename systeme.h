@@ -7,6 +7,7 @@
 #define SYSC_NEW_THREAD (2)
 #define SYSC_SLEEP (3)
 #define SYSC_IDLE (4)
+#define SYSC_GETCHAR (5)
 
 /**********************************************************
 ** appel du systeme
