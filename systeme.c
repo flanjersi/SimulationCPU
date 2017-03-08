@@ -9,6 +9,7 @@
 int current_process = -1;
 int nbr_process_alive = 0;
 int nbr_process_sleeping = 0;
+int first_pc = -1;
 
 /**********************************************************
 ** Programmes test
@@ -17,23 +18,25 @@ void make_inst_multi_thread_store(){
 	const int R1 = 1, R2 = 2, R3 = 3;
 
 	/*** Exemple de création d'un thread ***/
-	make_inst( 0, INST_SYSC,  R1, R1, SYSC_NEW_THREAD);  /* créer un thread  */
-	make_inst( 1, INST_IFGT,   0,  0, 10);               /* le père va en 10 */
+	make_inst( 0, INST_JUMP,  0, 0 , 0); /* boucle infinie idle */
+	first_pc = 1;
+	make_inst(first_pc +  0, INST_SYSC,  R1, R1, SYSC_NEW_THREAD);  /* créer un thread  */
+	make_inst(first_pc +  1, INST_IFGT,   0,  0, 10);               /* le père va en 10 */
 
 	/*** code du fils ***/
-	make_inst( 2, INST_LOAD,  R3, 0, 0);                 /* R3 = 1000    */
-	make_inst( 3, INST_SYSC,  R3,  0, SYSC_PUTI);        /* afficher R3  */
-	make_inst( 4, INST_NOP, 0,  0, 0);
-	make_inst( 5, INST_NOP,   0,   0, 0);
-	make_inst( 6, INST_NOP,   0,   0, 0);
-	make_inst( 7, INST_NOP,   0,   0, 0);
-	make_inst( 8, INST_NOP,   0,   0, 0);
-	make_inst( 9, INST_HALT,   0,   0, 0);
+	make_inst(first_pc +  2, INST_LOAD,  R3, 0, 0);                 /* R3 = 1000    */
+	make_inst(first_pc +  3, INST_SYSC,  R3,  0, SYSC_PUTI);        /* afficher R3  */
+	make_inst(first_pc +  4, INST_NOP, 0,  0, 0);
+	make_inst(first_pc +  5, INST_NOP,   0,   0, 0);
+	make_inst(first_pc +  6, INST_NOP,   0,   0, 0);
+	make_inst(first_pc +  7, INST_NOP,   0,   0, 0);
+	make_inst(first_pc +  8, INST_NOP,   0,   0, 0);
+	make_inst(first_pc +  9, INST_HALT,   0,   0, 0);
 
 	/*** code du père ***/
-	make_inst(10, INST_SUB, R3, R3, -3000);             /* R3 = 2000     */
-	make_inst(11, INST_STORE, R3,  0, 0);               /* afficher R3   */
-	make_inst(12, INST_SYSC,   0,  0, SYSC_EXIT);       /* fin du thread */
+	make_inst(first_pc + 10, INST_SUB, R3, R3, -3000);             /* R3 = 2000     */
+	make_inst(first_pc + 11, INST_STORE, R3,  0, 0);               /* afficher R3   */
+	make_inst(first_pc + 12, INST_SYSC,   0,  0, SYSC_EXIT);       /* fin du thread */
 }
 
 void make_inst_multi_thread(){
@@ -130,7 +133,6 @@ PSW systeme_init_boucle(void) {
 /********************************************************
 ** Affichage registre PC
 ***********************************************************/
-
 void print_PC(PSW m){
 	printf("Program counter : %d\n", m.PC);
 }
@@ -138,8 +140,6 @@ void print_PC(PSW m){
 /********************************************************
 ** Affichage registre DR
 ***********************************************************/
-
-
 void print_DR(PSW m){
 	printf("Print data registers : \n");
 	for(int i = 0 ; i < 8 ; i++)
@@ -185,7 +185,7 @@ PSW new_thread(PSW m){
 }
 
 
-PSW sleeping_thread(PSW m){
+PSW send_thread_to_sleep(PSW m){
 	sleeping_process[nbr_process_sleeping].id_process = current_process;
 	sleeping_process[nbr_process_sleeping].wake_up = time(NULL) + m.DR[m.RI.i];
 
@@ -207,7 +207,7 @@ PSW system_SYSC(PSW m){
 		case SYSC_NEW_THREAD:
 			return new_thread(m);
 		case SYSC_SLEEP:
-			return sleeping_thread(m);
+			return send_thread_to_sleep(m);
 		default:
 			printf("Unknown ARG of SYSC");
 			break;
