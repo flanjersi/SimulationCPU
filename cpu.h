@@ -42,11 +42,11 @@ extern WORD mem[128];     /* memoire                       */
 ** Table des processus
 ***********************************************************/
 
-#define MAX_PROCESS  (20)   /* nb maximum de processus  */
+#define MAX_PROCESS  (3)   /* nb maximum de processus  */
 
 #define EMPTY         (0)   /* processus non-pret       */
 #define READY         (1)   /* processus pret           */
-#define SLEEP					(2)		/* processus endormi */
+#define SLEEP	      (2)	/* processus endormi 		*/
 
 
 /**********************************************************
@@ -82,16 +82,12 @@ typedef struct PSW {    /* Processor Status Word */
 
 
 struct {
-    PSW  cpu;               /* mot d'etat du processeur */
-    int  state;             /* etat du processus        */
-} process[MAX_PROCESS];   /* table des processus      */
+    PSW  cpu;                  /* mot d'etat du processeur */
+    int  state;
+	time_t wake_up;            /* etat du processus        */
+} process[MAX_PROCESS];        /* table des processus      */
 
-struct {
-    int id_process;
-		time_t wake_up;             /* etat du processus        */
-} sleeping_process[MAX_PROCESS];
-
-extern int current_process;   /* nu du processus courant  */
+extern int current_process;    /* num du processus courant  */
 extern int nbr_process_alive;
 extern int nbr_process_sleeping;
 

@@ -16,23 +16,27 @@ int first_pc = -1;
 ***********************************************************/
 
 void make_inst_sleep_process(){
-	const int R1 = 1, R2 = 2, R3 = 3;
+	const int R1 = 1, R2 = 2, R3 = 3, R7 = 7;
 
 	/*** Exemple de création d'un thread ***/
-	make_inst( 0, INST_SYSC, 0, 0, SYSC_IDLE); /* boucle infinie idle */
-	make_inst( 1, INST_SYSC, 0, 0, SYSC_EXIT);
-	make_inst( 2, INST_JUMP, 0, 0, 0);
-	first_pc = 3;
+	make_inst( 0, INST_NOP,  0, 0, SYSC_IDLE); /* boucle infinie idle */
+	make_inst( 1, INST_NOP,   0,   0, 0);
+	make_inst( 2, INST_NOP,   0,   0, 0);
+	make_inst( 3, INST_NOP,   0,   0, 0);
+	make_inst( 4, INST_JUMP, 0, 0, 0);
+	first_pc = 5;
 
-	make_inst(first_pc +  0, INST_ADD,  R3, 0, 0);                 /* R3 = 1000    */
-	make_inst(first_pc +  1, INST_SYSC,  R3,  0, SYSC_PUTI);        /* afficher R3  */
-	make_inst(first_pc +  2, INST_NOP, 0,  0, 0);
-	make_inst(first_pc +  3, INST_NOP,   0,   0, 0);
+	make_inst(first_pc +  0, INST_ADD,  R3,   0, 0);                 /* R3 = 1000    */
+	make_inst(first_pc +  1, INST_ADD,  R7,  R7, 2);
+	make_inst(first_pc +  2, INST_SYSC, R7,   0, SYSC_SLEEP);  /* créer un thread  */
+	make_inst(first_pc +  3, INST_SYSC, R3,   0, SYSC_PUTI);        /* afficher R3  */
 	make_inst(first_pc +  4, INST_NOP,   0,   0, 0);
 	make_inst(first_pc +  5, INST_NOP,   0,   0, 0);
 	make_inst(first_pc +  6, INST_NOP,   0,   0, 0);
-	make_inst(first_pc +  7, INST_SYSC,  R1, R1, SYSC_SLEEP);  /* créer un thread  */
-	make_inst(first_pc +  8, INST_HALT,   0,   0, 0);
+	make_inst(first_pc +  7, INST_NOP,   0,   0, 0);
+	make_inst(first_pc +  8, INST_NOP,   0,   0, 0);
+	make_inst(first_pc +  9, INST_SYSC, R7,   0, SYSC_SLEEP);  /* créer un thread  */
+	make_inst(first_pc +  10, INST_HALT,  0,   0, 0);
 
 }
 
@@ -179,10 +183,23 @@ int find_first_empty(){
 /**********************************************************
 ** Simulation du systeme (mode systeme)
 ***********************************************************/
+void reveil(){
+	time_t current_time = time(NULL);
+	for(int i = 0 ; i < MAX_PROCESS ; i++){
+		if(process[i].state == SLEEP){
+			if(process[i].wake_up <= current_time){
+				process[i].state = READY;
+				nbr_process_alive++;
+				nbr_process_sleeping--;
+			}
+		}
+	}
+}
 
 PSW ordonnanceur(PSW m){
+	reveil();
 	if(current_process != -1){
-		memcpy(&(process[current_process].cpu), &m, sizeof(PSW));
+		process[current_process].cpu = m;
 	}
 
 	do{
@@ -208,11 +225,10 @@ PSW new_thread(PSW m){
 
 
 PSW send_thread_to_sleep(PSW m){
-	sleeping_process[nbr_process_sleeping].id_process = current_process;
-	sleeping_process[nbr_process_sleeping].wake_up = time(NULL) + m.DR[m.RI.i];
-
+	process[current_process].wake_up = time(NULL) + m.DR[m.RI.i];
 	process[current_process].state = SLEEP;
-
+	nbr_process_alive--;
+	nbr_process_sleeping++;
 	return ordonnanceur(m);
 }
 
@@ -225,7 +241,7 @@ PSW system_SYSC(PSW m){
 			return ordonnanceur(m);
 		case SYSC_PUTI:
 			printf("SYSC_PUTI : R%d = %d\n", m.RI.i, m.DR[m.RI.i]);
-			break;
+			break; ordonnanceur(m);
 		case SYSC_NEW_THREAD:
 			return new_thread(m);
 		case SYSC_SLEEP:
