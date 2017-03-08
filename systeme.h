@@ -6,6 +6,7 @@
 #define SYSC_PUTI (1)
 #define SYSC_NEW_THREAD (2)
 #define SYSC_SLEEP (3)
+#define SYSC_IDLE (4)
 
 /**********************************************************
 ** appel du systeme

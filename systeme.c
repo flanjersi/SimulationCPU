@@ -14,12 +14,34 @@ int first_pc = -1;
 /**********************************************************
 ** Programmes test
 ***********************************************************/
+
+void make_inst_sleep_process(){
+	const int R1 = 1, R2 = 2, R3 = 3;
+
+	/*** Exemple de création d'un thread ***/
+	make_inst( 0, INST_SYSC, 0, 0, SYSC_IDLE); /* boucle infinie idle */
+	make_inst( 1, INST_SYSC, 0, 0, SYSC_EXIT);
+	make_inst( 2, INST_JUMP, 0, 0, 0);
+	first_pc = 3;
+
+	make_inst(first_pc +  0, INST_ADD,  R3, 0, 0);                 /* R3 = 1000    */
+	make_inst(first_pc +  1, INST_SYSC,  R3,  0, SYSC_PUTI);        /* afficher R3  */
+	make_inst(first_pc +  2, INST_NOP, 0,  0, 0);
+	make_inst(first_pc +  3, INST_NOP,   0,   0, 0);
+	make_inst(first_pc +  4, INST_NOP,   0,   0, 0);
+	make_inst(first_pc +  5, INST_NOP,   0,   0, 0);
+	make_inst(first_pc +  6, INST_NOP,   0,   0, 0);
+	make_inst(first_pc +  7, INST_SYSC,  R1, R1, SYSC_SLEEP);  /* créer un thread  */
+	make_inst(first_pc +  8, INST_HALT,   0,   0, 0);
+
+}
+
+
+
 void make_inst_multi_thread_store(){
 	const int R1 = 1, R2 = 2, R3 = 3;
 
 	/*** Exemple de création d'un thread ***/
-	make_inst( 0, INST_JUMP,  0, 0 , 0); /* boucle infinie idle */
-	first_pc = 1;
 	make_inst(first_pc +  0, INST_SYSC,  R1, R1, SYSC_NEW_THREAD);  /* créer un thread  */
 	make_inst(first_pc +  1, INST_IFGT,   0,  0, 10);               /* le père va en 10 */
 
@@ -72,11 +94,11 @@ static PSW systeme_init(void) {
 	printf("Booting.\n");
 
 	/*** creation d'un programme ***/
-	make_inst_multi_thread(); //make_inst_multi_thread_store();
-
+	//make_inst_multi_thread(); //make_inst_multi_thread_store();
+  make_inst_sleep_process();
 	/*** valeur initiale du PSW ***/
 	memset (&cpu, 0, sizeof(cpu));
-	cpu.PC = 0;
+	cpu.PC = first_pc;
 	cpu.SB = 0;
 	cpu.SS = 20;
 
@@ -207,7 +229,11 @@ PSW system_SYSC(PSW m){
 		case SYSC_NEW_THREAD:
 			return new_thread(m);
 		case SYSC_SLEEP:
+			printf("Go to sleep current process %d\n", current_process);
 			return send_thread_to_sleep(m);
+		case SYSC_IDLE:
+			printf("SYSC_IDLE\n");
+			break;
 		default:
 			printf("Unknown ARG of SYSC");
 			break;
