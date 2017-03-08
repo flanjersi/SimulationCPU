@@ -9,8 +9,9 @@
 int current_process = -1;
 int nbr_process_alive = 0;
 int nbr_process_sleeping = 0;
+
 /**********************************************************
-** Demarrage du systeme
+** Programmes test
 ***********************************************************/
 void make_inst_multi_thread_store(){
 	const int R1 = 1, R2 = 2, R3 = 3;
@@ -20,7 +21,7 @@ void make_inst_multi_thread_store(){
 	make_inst( 1, INST_IFGT,   0,  0, 10);               /* le père va en 10 */
 
 	/*** code du fils ***/
-	make_inst( 2, INST_LOAD,  R3, 0, 0);            /* R3 = 1000    */
+	make_inst( 2, INST_LOAD,  R3, 0, 0);                 /* R3 = 1000    */
 	make_inst( 3, INST_SYSC,  R3,  0, SYSC_PUTI);        /* afficher R3  */
 	make_inst( 4, INST_NOP, 0,  0, 0);
 	make_inst( 5, INST_NOP,   0,   0, 0);
@@ -30,15 +31,15 @@ void make_inst_multi_thread_store(){
 	make_inst( 9, INST_HALT,   0,   0, 0);
 
 	/*** code du père ***/
-	make_inst(10, INST_SUB, R3, R3, -3000);           /* R3 = 2000     */
-	make_inst(11, INST_STORE, R3,  0, 0);       /* afficher R3   */
+	make_inst(10, INST_SUB, R3, R3, -3000);             /* R3 = 2000     */
+	make_inst(11, INST_STORE, R3,  0, 0);               /* afficher R3   */
 	make_inst(12, INST_SYSC,   0,  0, SYSC_EXIT);       /* fin du thread */
 }
 
 void make_inst_multi_thread(){
 	const int R1 = 1, R2 = 2, R3 = 3;
 
-		/*** Exemple de création d'un thread ***/
+	/*** Exemple de création d'un thread ***/
 	make_inst( 0, INST_SYSC,  R1, R1, SYSC_NEW_THREAD);  /* créer un thread  */
 	make_inst( 1, INST_IFGT,   0,  0, 10);               /* le père va en 10 */
 
@@ -59,31 +60,34 @@ void make_inst_multi_thread(){
 }
 
 
-
+/**********************************************************
+** Demarrage du systeme
+***********************************************************/
 static PSW systeme_init(void) {
 	PSW cpu;
 
 	printf("Booting.\n");
 
-	/*** creation d'un programme2 ***/
-	make_inst_multi_thread();
-	//make_inst_multi_thread_store();
+	/*** creation d'un programme ***/
+	make_inst_multi_thread(); //make_inst_multi_thread_store();
+
 	/*** valeur initiale du PSW ***/
 	memset (&cpu, 0, sizeof(cpu));
 	cpu.PC = 0;
 	cpu.SB = 0;
 	cpu.SS = 20;
 
+	/*** Pas de process ***/
 	for(int i = 0 ; i < MAX_PROCESS ; i++){
 		process[i].state = EMPTY;
 	}
+
 	/*** Initialisation processus idle ***/
 	process[0].state = READY;
 	process[0].cpu.PC = 0;
 	process[0].cpu.SB = 0;
 	process[0].cpu.SS = 20;
 	nbr_process_alive++;
-
 
 	/*** Initialisation de premier processus ***/
 	memcpy(&(process[1].cpu), &cpu, sizeof(PSW));
