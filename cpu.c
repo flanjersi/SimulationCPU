@@ -132,6 +132,7 @@ PSW cpu(PSW m) {
 			m.IN = INT_SEGV;
 			return (m);
 		}
+
 		m.RI = decode_instruction(mem[m.PC + m.SB]);
 		/*** execution de l'instruction ***/
 		switch (m.RI.OP) {

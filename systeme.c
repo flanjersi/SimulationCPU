@@ -9,26 +9,37 @@
 int current_process = -1;
 int nbr_process_alive = 0;
 int nbr_process_sleeping = 0;
-int first_pc = -1;
+int nbr_in_getchar = 0;
+
+int first_pc = 0;
 char tampon = '\0';
 
+time_t prochain_appel;
 /**********************************************************
 ** Programmes test
 ***********************************************************/
 
 void make_inst_test_getchar(){
-	const int R3 = 3, R4 = 4;
+	const int R4 = 4, R3 = 3;
 
 	/*** Lecture d'un caractère et endormissement ***/
-	make_inst( 0, INST_SUB,   R3, R3, -1);           /* R3 = 1         */
-	make_inst( 1, INST_SYSC,  R4,  0, SYSC_GETCHAR); /* R4 = getchar() */
-	make_inst( 2, INST_SYSC,  R4,  0, SYSC_PUTI);    /* puti(R4)       */
-	make_inst( 3, INST_SYSC,  R3,  0, SYSC_SLEEP);   /* sleep(R3)      */
-	make_inst( 4, INST_JUMP,   0,  0, 1);            /* go to 1        */
+
+	make_inst( 0, INST_NOP,  0, 0, SYSC_IDLE); /* boucle infinie idle */
+	make_inst( 1, INST_NOP,   0,   0, 0);
+	make_inst( 2, INST_NOP,   0,   0, 0);
+	make_inst( 3, INST_NOP,   0,   0, 0);
+	make_inst( 4, INST_JUMP, 0, 0, 0);
+	first_pc = 5;
+	make_inst( first_pc + 0, INST_SUB,   R3, R3, -1);           /* R3 = 1         */
+	make_inst( first_pc + 1, INST_SYSC,  R4,  0, SYSC_GETCHAR); /* R4 = getchar() */
+	make_inst( first_pc + 2, INST_SYSC,  R4,  0, SYSC_PUTI);    /* puti(R4)       */
+	make_inst( first_pc + 3, INST_SYSC,  R3,  0, SYSC_SLEEP);   /* sleep(R3)      */
+	make_inst( first_pc + 4, INST_JUMP,   0,  0, first_pc);            /* go to 1        */
+
 }
 
 void make_inst_test_sleep(){
-	const int R1 = 1, R2 = 2, R3 = 3, R7 = 7;
+	const int R3 = 3, R7 = 7;
 
 	/*** Exemple de création d'un thread ***/
 	make_inst( 0, INST_NOP,  0, 0, SYSC_IDLE); /* boucle infinie idle */
@@ -55,7 +66,7 @@ void make_inst_test_sleep(){
 
 
 void make_inst_test_thread(){
-	const int R1 = 1, R2 = 2, R3 = 3;
+	const int R1 = 1, R3 = 3;
 
 	/*** Exemple de création d'un thread ***/
 	make_inst(first_pc +  0, INST_SYSC,  R1, R1, SYSC_NEW_THREAD);  /* créer un thread  */
@@ -78,7 +89,7 @@ void make_inst_test_thread(){
 }
 
 void make_inst_multi_thread(){
-	const int R1 = 1, R2 = 2, R3 = 3;
+	const int R1 = 1, R3 = 3;
 
 	/*** Exemple de création d'un thread ***/
 	make_inst( 0, INST_SYSC,  R1, R1, SYSC_NEW_THREAD);  /* créer un thread  */
@@ -109,9 +120,13 @@ static PSW systeme_init(void) {
 
 	printf("Booting.\n");
 
+	/** Initialisation prochain appel frappe_clavier **/
+	prochain_appel = time(NULL) + 4;
+
 	/*** creation d'un programme ***/
 	//make_inst_multi_thread(); //make_inst_test_thread();
-  	make_inst_test_sleep();
+  //make_inst_test_sleep();
+	make_inst_test_getchar();
 
 	/*** valeur initiale du PSW ***/
 	memset (&cpu, 0, sizeof(cpu));
@@ -245,12 +260,17 @@ PSW send_thread_to_sleep(PSW m){
 }
 
 void frappe_clavier(){
-	time_t prochain_appel = time(NULL) + 4;
+	//Ou le mettre ?
 	tampon = 'c';
-	for(int i = 0 ; i < MAX_PROCESS ; i++){
-		if(process[i].state == GETCHAR){
-			process[i].state = READY;
-			return;
+
+	if(nbr_in_getchar != 0){
+		for(int i = 0 ; i < MAX_PROCESS ; i++){
+			if(process[i].state == GETCHAR){
+				process[i].state = READY;
+				//A verifier
+				//process[i].cpu.DR[process[i].cpu.RI.i] = 'a';
+				return;
+			}
 		}
 	}
 }
@@ -258,6 +278,7 @@ void frappe_clavier(){
 PSW my_getchar(PSW m){
 	if(tampon == '\0'){
 		process[current_process].state = GETCHAR;
+		nbr_in_getchar++;
 		return ordonnanceur(m);
 	}
 	else{
@@ -300,7 +321,12 @@ PSW system_SYSC(PSW m){
 ***********************************************************/
 
 PSW systeme(PSW m) {
-	//printf("Received interrupt number : %d\n", m.IN);
+	//printf("Courrant : %ld ############## prochain_appel = %ld\n", time(NULL), prochain_appel);
+	if(prochain_appel <= time(NULL) && m.IN != INT_INIT){
+		prochain_appel = time(NULL) + 4;
+		frappe_clavier();
+	}
+
 	switch (m.IN) {
 		case INT_INIT:
 			return (systeme_init());

@@ -8,6 +8,7 @@
 #define SYSC_SLEEP (3)
 #define SYSC_IDLE (4)
 #define SYSC_GETCHAR (5)
+#define SYSC_FORK (5)
 
 /**********************************************************
 ** appel du systeme
