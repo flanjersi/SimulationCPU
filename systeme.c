@@ -283,6 +283,7 @@ PSW my_getchar(PSW m){
 	}
 	else{
 		m.DR[m.RI.i] = tampon;
+		tampon = '\0';
 		return m;
 	}
 }
