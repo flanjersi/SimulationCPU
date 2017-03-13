@@ -149,7 +149,7 @@ static PSW systeme_init(void) {
 	nbr_process++;
 
 	/*** Initialisation de premier processus ***/
-	process[1].cpu.PC = first_pc;
+	process[1].cpu.PC = 0;
 	process[1].cpu.SB = nbr_process * SEGMENT_SIZE;
 	process[1].cpu.SS = SEGMENT_SIZE;
 	process[1].state = READY;
@@ -377,6 +377,7 @@ PSW systeme(PSW m) {
 			print_DR(m);
 			break;
 		case INT_INST:
+			printf("Instuction inconue");
 			exit(EXIT_FAILURE);
 		case INT_HALT:
 			printf("\n---Fin de programme --- \n");
