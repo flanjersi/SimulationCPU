@@ -260,19 +260,18 @@ PSW send_thread_to_sleep(PSW m){
 }
 
 void frappe_clavier(){
-	//Ou le mettre ?
-	tampon = 'c';
-
+	
 	if(nbr_in_getchar != 0){
 		for(int i = 0 ; i < MAX_PROCESS ; i++){
 			if(process[i].state == GETCHAR){
 				process[i].state = READY;
-				//A verifier
-				//process[i].cpu.DR[process[i].cpu.RI.i] = 'a';
+				process[i].cpu.DR[process[i].cpu.RI.i] = 'c';
 				return;
 			}
 		}
 	}
+
+	tampon = 'c';
 }
 
 PSW my_getchar(PSW m){
@@ -333,6 +332,7 @@ PSW system_SYSC(PSW m){
 PSW systeme(PSW m) {
 	//printf("Courrant : %ld ############## prochain_appel = %ld\n", time(NULL), prochain_appel);
 	if(prochain_appel <= time(NULL) && m.IN != INT_INIT){
+		printf("coucou\n");
 		prochain_appel = time(NULL) + 4;
 		frappe_clavier();
 	}
