@@ -9,7 +9,7 @@
 ** definition de la memoire simulee
 ***********************************************************/
 
-WORD mem[128];     /* memoire */
+WORD mem[MEM_SIZE];     /* memoire */
 
 /**********************************************************
 ** Placer une instruction en memoire

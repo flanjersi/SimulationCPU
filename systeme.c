@@ -287,9 +287,10 @@ PSW my_getchar(PSW m){
 	}
 }
 
+/*
 PSW my_fork(PSW m){
-
-}
+	;
+}*/
 
 PSW system_SYSC(PSW m){
 	switch(m.RI.ARG){
@@ -313,6 +314,7 @@ PSW system_SYSC(PSW m){
 			return my_getchar(m);
 		case SYSC_FORK:
 			printf("SYSC_FORK\n");
+			break;
 		default:
 			printf("Unknown ARG of SYSC\n");
 			break;
