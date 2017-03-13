@@ -40,7 +40,7 @@ void make_inst_test_getchar(){
 	make_inst( first_pc + 1, INST_SYSC,  R4,  0, SYSC_GETCHAR); /* R4 = getchar() */
 	make_inst( first_pc + 2, INST_SYSC,  R4,  0, SYSC_PUTI);    /* puti(R4)       */
 	make_inst( first_pc + 3, INST_SYSC,  R3,  0, SYSC_SLEEP);   /* sleep(R3)      */
-
+	make_inst( first_pc + 4, INST_JUMP, 0, 0, first_pc);
 }
 
 void make_inst_test_sleep(){
@@ -122,8 +122,6 @@ void make_inst_multi_thread(){
 ** Demarrage du systeme
 ***********************************************************/
 static PSW systeme_init(void) {
-	PSW cpu;
-
 	printf("Booting.\n");
 
 	/** Initialisation prochain appel frappe_clavier **/
@@ -150,18 +148,17 @@ static PSW systeme_init(void) {
 	nbr_process_alive++;
 	nbr_process++;
 
-	memset (&cpu, 0, sizeof(cpu));
-	cpu.PC = first_pc;
-	cpu.SB = nbr_process * SEGMENT_SIZE;
-	cpu.SS = SEGMENT_SIZE;
-	nbr_process++;
-
 	/*** Initialisation de premier processus ***/
-	memcpy(&(process[1].cpu), &cpu, sizeof(PSW));
+	process[1].cpu.PC = first_pc;
+	process[1].cpu.SB = nbr_process * SEGMENT_SIZE;
+	process[1].cpu.SS = SEGMENT_SIZE;
 	process[1].state = READY;
 	nbr_process_alive++;
+	nbr_process++;
 
 	current_process = 1;
+
+
 	return process[1].cpu;
 }
 
