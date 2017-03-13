@@ -33,10 +33,12 @@
 /**********************************************************
 ** definition d'un mot memoire
 ***********************************************************/
+#define MEM_SIZE 1024
+#define SEGMENT_SIZE 32
 
 typedef int WORD;         /* un mot est un entier 32 bits  */
 
-extern WORD mem[128];     /* memoire                       */
+extern WORD mem[MEM_SIZE];     /* memoire                       */
 
 /**********************************************************
 ** Table des processus
