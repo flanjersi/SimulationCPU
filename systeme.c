@@ -6,10 +6,13 @@
 #include "cpu.h"
 #include "systeme.h"
 
+
 int current_process = -1;
+
 int nbr_process_alive = 0;
 int nbr_process_sleeping = 0;
 int nbr_in_getchar = 0;
+int nbr_process = 0;
 
 int first_pc = 0;
 
@@ -17,6 +20,7 @@ char tampon = '\0';
 char caractere = 'a';
 
 time_t prochain_appel;
+
 /**********************************************************
 ** Programmes test
 ***********************************************************/
@@ -31,12 +35,11 @@ void make_inst_test_getchar(){
 	make_inst( 2, INST_NOP,   0,   0, 0);
 	make_inst( 3, INST_NOP,   0,   0, 0);
 	make_inst( 4, INST_JUMP, 0, 0, 0);
-	first_pc = 5;
+	first_pc = SEGMENT_SIZE;
 	make_inst( first_pc + 0, INST_SUB,   R3,  R3, -1);           /* R3 = 1         */
 	make_inst( first_pc + 1, INST_SYSC,  R4,  0, SYSC_GETCHAR); /* R4 = getchar() */
 	make_inst( first_pc + 2, INST_SYSC,  R4,  0, SYSC_PUTI);    /* puti(R4)       */
 	make_inst( first_pc + 3, INST_SYSC,  R3,  0, SYSC_SLEEP);   /* sleep(R3)      */
-	make_inst( first_pc + 4, INST_JUMP,   0,  0, first_pc);            /* go to 1        */
 
 }
 
@@ -49,6 +52,7 @@ void make_inst_test_sleep(){
 	make_inst( 2, INST_NOP,   0,   0, 0);
 	make_inst( 3, INST_NOP,   0,   0, 0);
 	make_inst( 4, INST_JUMP, 0, 0, 0);
+
 	first_pc = 5;
 
 	make_inst(first_pc +  0, INST_ADD,  R3,   0, 0);                 /* R3 = 1000    */
@@ -131,10 +135,6 @@ static PSW systeme_init(void) {
 	make_inst_test_getchar();
 
 	/*** valeur initiale du PSW ***/
-	memset (&cpu, 0, sizeof(cpu));
-	cpu.PC = first_pc;
-	cpu.SB = 0;
-	cpu.SS = 20;
 
 	/*** Pas de process ***/
 	for(int i = 0 ; i < MAX_PROCESS ; i++){
@@ -144,9 +144,17 @@ static PSW systeme_init(void) {
 	/*** Initialisation processus idle ***/
 	process[0].state = READY;
 	process[0].cpu.PC = 0;
-	process[0].cpu.SB = 0;
-	process[0].cpu.SS = 20;
+	process[0].cpu.SB = nbr_process * SEGMENT_SIZE;
+	process[0].cpu.SS = SEGMENT_SIZE;
+
 	nbr_process_alive++;
+	nbr_process++;
+
+	memset (&cpu, 0, sizeof(cpu));
+	cpu.PC = first_pc;
+	cpu.SB = nbr_process * SEGMENT_SIZE;
+	cpu.SS = SEGMENT_SIZE;
+	nbr_process++;
 
 	/*** Initialisation de premier processus ***/
 	memcpy(&(process[1].cpu), &cpu, sizeof(PSW));
@@ -214,6 +222,8 @@ int find_first_empty(){
 ** Simulation du systeme (mode systeme)
 ***********************************************************/
 void reveil(){
+	if(nbr_process_sleeping == 0) return;
+
 	for(int i = 0 ; i < MAX_PROCESS ; i++){
 		if(process[i].state == SLEEP){
 			if(process[i].wake_up <= time(NULL)){
@@ -227,9 +237,15 @@ void reveil(){
 
 PSW ordonnanceur(PSW m){
 	reveil();
+
 	if(current_process != -1){
 		process[current_process].cpu = m;
 	}
+
+	/*if(nbr_process_alive == 1){
+		current_process = 0;
+		return process[0].cpu;
+	}*/
 
 	do{
 		current_process = (current_process + 1) % MAX_PROCESS;
@@ -248,12 +264,16 @@ PSW new_thread(PSW m){
 	process[index].cpu.DR[m.RI.i] = 0;
 	process[index].cpu.AC = 0;
 	process[index].state = READY;
+
 	nbr_process_alive++;
+
 	return m;
 }
 
 
 PSW send_thread_to_sleep(PSW m){
+	printf("Go to sleep current process %d\n", current_process);
+
 	process[current_process].wake_up = time(NULL) + m.DR[m.RI.i];
 	process[current_process].state = SLEEP;
 	nbr_process_alive--;
@@ -267,6 +287,8 @@ void frappe_clavier(){
 		for(int i = 0 ; i < MAX_PROCESS ; i++){
 			if(process[i].state == GETCHAR){
 				process[i].state = READY;
+				nbr_in_getchar--;
+				nbr_process_alive++;
 				process[i].cpu.DR[process[i].cpu.RI.i] = caractere;
 				return;
 			}
@@ -277,6 +299,8 @@ void frappe_clavier(){
 }
 
 PSW my_getchar(PSW m){
+	printf("SYSC_GETCHAR\n");
+
 	if(tampon == '\0'){
 		process[current_process].state = GETCHAR;
 		nbr_in_getchar++;
@@ -291,31 +315,36 @@ PSW my_getchar(PSW m){
 
 
 PSW my_fork(PSW m){
+	printf("SYSC_FORK\n");
+
 	return m;
+}
+
+PSW my_exit(PSW m){
+	printf("SYSC_EXIT : End of process\n");
+	process[current_process].state = EMPTY;
+	nbr_process_alive--;
+
+	return ordonnanceur(m);
 }
 
 PSW system_SYSC(PSW m){
 	switch(m.RI.ARG){
 		case SYSC_EXIT:
-			printf("SYSC_EXIT : End of process\n");
-			process[current_process].state = EMPTY;
-			return ordonnanceur(m);
+			return my_exit(m);
 		case SYSC_PUTI:
 			printf("SYSC_PUTI : R%d = %d\n", m.RI.i, m.DR[m.RI.i]);
 			break;
 		case SYSC_NEW_THREAD:
 			return new_thread(m);
 		case SYSC_SLEEP:
-			printf("Go to sleep current process %d\n", current_process);
 			return send_thread_to_sleep(m);
 		case SYSC_IDLE:
 			printf("SYSC_IDLE\n");
 			break;
 		case SYSC_GETCHAR:
-			printf("SYSC_GETCHAR\n");
 			return my_getchar(m);
 		case SYSC_FORK:
-			printf("SYSC_FORK\n");
 			return my_fork(m);
 		default:
 			printf("Unknown ARG of SYSC\n");

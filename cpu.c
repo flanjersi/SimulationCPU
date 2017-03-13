@@ -128,7 +128,8 @@ PSW cpu_STORE(PSW m){
 PSW cpu(PSW m) {
 	for(int i = 0 ; i < CPU_CLOCK ; i++){
 			/*** lecture et decodage de l'instruction ***/
-		if (m.PC < 0 || m.PC >= m.SS) {
+		printf("PROCESS = %d PC = %d , SB+SS = %d\n", current_process, m.PC, m.SB + m.SS);
+		if (m.PC <= m.SB || m.PC >= (m.SB + m.SS)) {
 			m.IN = INT_SEGV;
 			return (m);
 		}

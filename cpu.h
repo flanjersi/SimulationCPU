@@ -93,7 +93,7 @@ struct {
 extern int current_process;    /* num du processus courant  */
 extern int nbr_process_alive;
 extern int nbr_process_sleeping;
-
+extern int nbr_process;
 /**********************************************************
 ** implanter une instruction en memoire
 ***********************************************************/
