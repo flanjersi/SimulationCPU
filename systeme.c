@@ -35,12 +35,13 @@ void make_inst_test_getchar(){
 	make_inst( 2, INST_NOP,   0,   0, 0);
 	make_inst( 3, INST_NOP,   0,   0, 0);
 	make_inst( 4, INST_JUMP, 0, 0, 0);
+
 	first_pc = SEGMENT_SIZE;
 	make_inst( first_pc + 0, INST_SUB,   R3,  R3, -1);           /* R3 = 1         */
 	make_inst( first_pc + 1, INST_SYSC,  R4,  0, SYSC_GETCHAR); /* R4 = getchar() */
 	make_inst( first_pc + 2, INST_SYSC,  R4,  0, SYSC_PUTI);    /* puti(R4)       */
 	make_inst( first_pc + 3, INST_SYSC,  R3,  0, SYSC_SLEEP);   /* sleep(R3)      */
-	make_inst( first_pc + 4, INST_JUMP, 0, 0, first_pc);
+	make_inst( first_pc + 4, INST_JUMP, 0, 0, 0);
 }
 
 void make_inst_test_sleep(){
@@ -142,7 +143,7 @@ static PSW systeme_init(void) {
 	/*** Initialisation processus idle ***/
 	process[0].state = READY;
 	process[0].cpu.PC = 0;
-	process[0].cpu.SB = nbr_process * SEGMENT_SIZE;
+	process[0].cpu.SB = 0;
 	process[0].cpu.SS = SEGMENT_SIZE;
 
 	nbr_process_alive++;
