@@ -12,7 +12,9 @@ int nbr_process_sleeping = 0;
 int nbr_in_getchar = 0;
 
 int first_pc = 0;
+
 char tampon = '\0';
+char caractere = 'a';
 
 time_t prochain_appel;
 /**********************************************************
@@ -265,13 +267,13 @@ void frappe_clavier(){
 		for(int i = 0 ; i < MAX_PROCESS ; i++){
 			if(process[i].state == GETCHAR){
 				process[i].state = READY;
-				process[i].cpu.DR[process[i].cpu.RI.i] = 'c';
+				process[i].cpu.DR[process[i].cpu.RI.i] = caractere;
 				return;
 			}
 		}
 	}
 
-	tampon = 'c';
+	tampon = caractere;
 }
 
 PSW my_getchar(PSW m){
@@ -287,10 +289,10 @@ PSW my_getchar(PSW m){
 	}
 }
 
-/*
+
 PSW my_fork(PSW m){
-	;
-}*/
+	return m;
+}
 
 PSW system_SYSC(PSW m){
 	switch(m.RI.ARG){
@@ -314,7 +316,7 @@ PSW system_SYSC(PSW m){
 			return my_getchar(m);
 		case SYSC_FORK:
 			printf("SYSC_FORK\n");
-			break;
+			return my_fork(m);
 		default:
 			printf("Unknown ARG of SYSC\n");
 			break;
