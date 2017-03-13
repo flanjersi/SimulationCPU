@@ -30,7 +30,7 @@ void make_inst_test_getchar(){
 	make_inst( 3, INST_NOP,   0,   0, 0);
 	make_inst( 4, INST_JUMP, 0, 0, 0);
 	first_pc = 5;
-	make_inst( first_pc + 0, INST_SUB,   R3, R3, -1);           /* R3 = 1         */
+	make_inst( first_pc + 0, INST_SUB,   R3,  R3, -1);           /* R3 = 1         */
 	make_inst( first_pc + 1, INST_SYSC,  R4,  0, SYSC_GETCHAR); /* R4 = getchar() */
 	make_inst( first_pc + 2, INST_SYSC,  R4,  0, SYSC_PUTI);    /* puti(R4)       */
 	make_inst( first_pc + 3, INST_SYSC,  R3,  0, SYSC_SLEEP);   /* sleep(R3)      */
@@ -260,7 +260,7 @@ PSW send_thread_to_sleep(PSW m){
 }
 
 void frappe_clavier(){
-	
+
 	if(nbr_in_getchar != 0){
 		for(int i = 0 ; i < MAX_PROCESS ; i++){
 			if(process[i].state == GETCHAR){
@@ -332,7 +332,6 @@ PSW system_SYSC(PSW m){
 PSW systeme(PSW m) {
 	//printf("Courrant : %ld ############## prochain_appel = %ld\n", time(NULL), prochain_appel);
 	if(prochain_appel <= time(NULL) && m.IN != INT_INIT){
-		printf("coucou\n");
 		prochain_appel = time(NULL) + 4;
 		frappe_clavier();
 	}
