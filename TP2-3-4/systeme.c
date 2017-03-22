@@ -11,28 +11,27 @@ int nbr_process_alive = 0;
 int nbr_process_sleeping = 0;
 int nbr_in_getchar = 0;
 int nbr_process = 0;
-int first_pc = 0;
-char tampon = '\0';
-char caractere = 'a';
 
-time_t prochain_appel;
+int first_pc = 0;
+
+char tampon = '\0'; /* caractere tampon pour GETCHAR */
+char caractere = 'a'; /* caractere qui sera mis dans le tampon */
+
+time_t prochain_appel; /* prochain appel de GETCHAR */
 
 /**********************************************************
 ** Programmes test
 ***********************************************************/
+
+/* FORK fonctionnel avec processus idle */
 void make_inst_test_fork(){
     const int R3 = 3;
-	make_inst( 0, INST_NOP,   0,   0,   SYSC_IDLE);
-    make_inst( 1, INST_NOP,   0,   0,   0);
-    make_inst( 2, INST_NOP,   0,   0,   0);
-    make_inst( 3, INST_NOP,   0,   0,   0);
-    make_inst( 4, INST_JUMP,  0,   0,   0);
-    first_pc = SEGMENT_SIZE;
+    first_pc = nbr_process * SEGMENT_SIZE;
     make_inst( first_pc + 0, INST_SYSC,  0,   0,   SYSC_FORK);
     make_inst( first_pc + 1, INST_IFGT,  0,   0,   6);
     make_inst( first_pc + 2, INST_SYSC,  R3,  0,   SYSC_PUTI);
     make_inst( first_pc + 3, INST_NOP,   0,   0,   0);
-	make_inst( first_pc + 4, INST_SYSC,  R3,  0,   SYSC_PUTI);
+	  make_inst( first_pc + 4, INST_SYSC,  R3,  0,   SYSC_PUTI);
     make_inst( first_pc + 5, INST_SYSC,  0,   0,   SYSC_EXIT);
     make_inst( first_pc + 6, INST_SUB,   R3,  R3,  -4);
     make_inst( first_pc + 7, INST_SYSC,  R3,  0,   SYSC_SLEEP);
@@ -40,31 +39,23 @@ void make_inst_test_fork(){
     make_inst( first_pc + 9, INST_JUMP,  0,   0,   0);
 }
 
+/* GETCHAR fonctionnel avec processus idle */
 void make_inst_test_getchar(){
 	const int R4 = 4, R3 = 3;
-	make_inst( 0, INST_SYSC,  0,   0,   SYSC_IDLE);
-	make_inst( 1, INST_NOP,   0,   0,   0);
-	make_inst( 2, INST_NOP,   0,   0,   0);
-	make_inst( 3, INST_NOP,   0,   0,   0);
-	make_inst( 4, INST_JUMP,  0,   0,   0);
-	first_pc = SEGMENT_SIZE;
-	make_inst( first_pc + 0, INST_SUB,   R3,  R3,  -1);
+  first_pc = nbr_process * SEGMENT_SIZE;
+	make_inst( first_pc + 0, INST_SUB,   R3,  R3,  -2);
 	make_inst( first_pc + 1, INST_SYSC,  R4,  0,   SYSC_GETCHAR);
 	make_inst( first_pc + 2, INST_SYSC,  R4,  0,   SYSC_PUTI);
 	make_inst( first_pc + 3, INST_SYSC,  R3,  0,   SYSC_SLEEP);
 	make_inst( first_pc + 4, INST_JUMP,  0,   0,   0);
 }
 
+/* SLEEP fonctionnel avec processus idle*/
 void make_inst_test_sleep(){
 	const int R3 = 3, R7 = 7;
-	make_inst( 0, INST_NOP,   0,   0,   SYSC_IDLE);
-	make_inst( 1, INST_NOP,   0,   0,   0);
-	make_inst( 2, INST_NOP,   0,   0,   0);
-	make_inst( 3, INST_NOP,   0,   0,   0);
-	make_inst( 4, INST_JUMP,  0,   0,   0);
-	first_pc = SEGMENT_SIZE;
+  first_pc = nbr_process * SEGMENT_SIZE;
 	make_inst(first_pc +  0,   INST_ADD,   R3,  0,   0);
-	make_inst(first_pc +  1,   INST_ADD,   R7,  R7,  2);
+	make_inst(first_pc +  1,   INST_ADD,   R7,  R7,  10);
 	make_inst(first_pc +  2,   INST_SYSC,  R7,  0,  SYSC_SLEEP);
 	make_inst(first_pc +  3,   INST_SYSC,  R3,  0,  SYSC_PUTI);
 	make_inst(first_pc +  4,   INST_NOP,   0,   0,  0);
@@ -76,40 +67,25 @@ void make_inst_test_sleep(){
 	make_inst(first_pc +  10,  INST_HALT,  0,   0,  0);
 }
 
+/** THREAD avec LOAD fonctionnel avec idle **/
 void make_inst_test_thread(){
-	const int R1 = 1, R3 = 3;
+	const int R1 = 1, R3 = 3, R2 = 2;
+  first_pc = nbr_process * SEGMENT_SIZE;
 	make_inst(first_pc +  0, INST_SYSC,  R1, R1,   SYSC_NEW_THREAD);
-	make_inst(first_pc +  1, INST_IFGT,  0,   0,   10);
-	make_inst(first_pc +  2, INST_LOAD,  R3,  0,   0);
-	make_inst(first_pc +  3, INST_SYSC,  R3,  0,   SYSC_PUTI);
-	make_inst(first_pc +  4, INST_NOP,   0,   0,   0);
+	make_inst(first_pc +  1, INST_IFGT,  0,   0,   11);
+  make_inst(first_pc +  2, INST_SUB,   R3,  R3,  -4000);
+  make_inst(first_pc +  3, INST_STORE,  R3,  0,   0);
+	make_inst(first_pc +  4, INST_NOP,  R3,  0,   SYSC_PUTI);
 	make_inst(first_pc +  5, INST_NOP,   0,   0,   0);
 	make_inst(first_pc +  6, INST_NOP,   0,   0,   0);
-	make_inst(first_pc +  7, INST_NOP,   0,   0,   0);
-	make_inst(first_pc +  8, INST_NOP,   0,   0,   0);
-	make_inst(first_pc +  9, INST_HALT,  0,   0,   0);
-	make_inst(first_pc + 10, INST_SUB,   R3,  R3,  -3000);
-	make_inst(first_pc + 11, INST_STORE, R3,  0,   0);
-	make_inst(first_pc + 12, INST_SYSC,  0,   0,   SYSC_EXIT);
+	make_inst(first_pc +  7, INST_HALT,  0,   0,   0);
+  make_inst(first_pc +  8, INST_NOP,   0,   0,   0);
+  make_inst(first_pc +  9, INST_NOP,   0,   0,   0);
+  make_inst(first_pc + 10, INST_NOP,   0,   0,   0);
+  make_inst(first_pc + 11, INST_LOAD, R2,  0,   0);
+  make_inst(first_pc + 12, INST_SYSC, R2,  0,   SYSC_PUTI);
+	make_inst(first_pc + 13, INST_SYSC,  0,   0,   SYSC_EXIT);
 }
-
-void make_inst_multi_thread(){
-	const int R1 = 1, R3 = 3;
-	make_inst( 0, INST_SYSC,  R1,  R1,  SYSC_NEW_THREAD);
-	make_inst( 1, INST_IFGT,  0,   0,   10);
-	make_inst( 2, INST_SUB,   R3,  R3,  -1000);
-	make_inst( 3, INST_SYSC,  R3,  0,   SYSC_PUTI);
-	make_inst( 4, INST_NOP,   0,   0,   0);
-	make_inst( 5, INST_NOP,   0,   0,   0);
-	make_inst( 6, INST_NOP,   0,   0,   0);
-	make_inst( 7, INST_NOP,   0,   0,   0);
-	make_inst( 8, INST_NOP,   0,   0,   0);
-	make_inst( 9, INST_NOP,   0,   0,   0);
-	make_inst(10, INST_SUB,   R3,  R3,  -2000);
-	make_inst(11, INST_SYSC,  R3,  0,   SYSC_PUTI);
-	make_inst(12, INST_SYSC,  0,   0,   SYSC_EXIT);
-}
-
 
 /**********************************************************
 ** Demarrage du systeme
@@ -119,12 +95,6 @@ static PSW systeme_init(void) {
 
 	/** Initialisation prochain appel frappe_clavier **/
 	prochain_appel = time(NULL) + 4;
-
-	/*** creation d'un programme ***/
-	//make_inst_multi_thread();
-    make_inst_test_thread();
-    //make_inst_test_sleep();
-	//make_inst_test_fork();
 
 	/*** valeur initiale du PSW ***/
 	for(int i = 0 ; i < MAX_PROCESS ; i++){
@@ -139,6 +109,20 @@ static PSW systeme_init(void) {
 	nbr_process_alive++;
 	nbr_process++;
 
+  /*** Creation des instruction pour le processus idle */
+  make_inst( 0, INST_NOP,   0,   0,   SYSC_IDLE);
+  make_inst( 1, INST_NOP,   0,   0,   0);
+  make_inst( 2, INST_NOP,   0,   0,   0);
+  make_inst( 3, INST_NOP,   0,   0,   0);
+  make_inst( 4, INST_JUMP,  0,   0,   0);
+
+  /*** creation d'un programme pour le prochain processus */
+
+  make_inst_test_thread();
+  //make_inst_test_sleep();
+	//make_inst_test_fork();
+  //make_inst_test_getchar();
+
 	/*** Initialisation de premier processus ***/
 	process[1].cpu.PC = 0;
 	process[1].cpu.SB = nbr_process * SEGMENT_SIZE;
@@ -151,35 +135,6 @@ static PSW systeme_init(void) {
 	return process[1].cpu;
 }
 
-PSW systeme_init_boucle(void) {
-    PSW cpu;
-    const int R1 = 1, R2 = 2, R3 = 3;
-
-    printf("Booting (avec boucle).\n");
-
-    /*** creation d'un programme ***/
-    make_inst( 0, INST_ADD,  R1, R1, 0);
-    make_inst( 1, INST_ADD,  R2, R2, 10);
-    make_inst( 2, INST_ADD,  R3, R3, 5);
-    make_inst( 3, INST_CMP,  R1, R2, 0);
-    make_inst( 4, INST_IFGT,  0,  0, 11);
-    make_inst( 5, INST_NOP,   0,  0, 0);
-    make_inst( 6, INST_LOAD,   R2,  R3, 1);
-    make_inst( 7, INST_NOP,   0,  0, 0);
-    make_inst( 8, INST_ADD,  R1, R3, 0);
-    make_inst( 9, INST_SYSC,  R1,  0, SYSC_PUTI);
-	make_inst(10, INST_SYSC,  R1,  0, SYSC_NEW_THREAD);
-    make_inst(11, INST_JUMP,  0,  0, 3);
-    make_inst(12, INST_HALT,  0,  0, 0);
-
-    /*** valeur initiale du PSW ***/
-    memset (&cpu, 0, sizeof(cpu));
-    cpu.PC = 0;
-    cpu.SB = 0;
-    cpu.SS = 20;
-    return cpu;
-}
-
 /**********************************************************
 ** Affichage registre PC
 ***********************************************************/
@@ -188,13 +143,19 @@ void print_PC(PSW m){
 }
 
 /**********************************************************
-** Affichage registre DR
+** Affichage des registres DR du processus courrant
 ***********************************************************/
 void print_DR(PSW m){
 	printf("Print data registers : \n");
 	for(int i = 0 ; i < 8 ; i++)
 		printf("  |--> DR[%d] = %d\n", i , m.DR[i]);
 }
+
+
+/**********************************************************
+** Cherche le premier emplacement libre
+** pour y mettre un processus
+***********************************************************/
 
 int find_first_empty(){
 	for(int i = 0 ; i < MAX_PROCESS ; i++){
@@ -205,7 +166,9 @@ int find_first_empty(){
 }
 
 /**********************************************************
-** Simulation du systeme (mode systeme)
+** Reveil les processus pouvant être reveiller
+** c'est à dire si 'wake_up' est inferieur ou egale
+** au nombre de seconde depuis l'epoch unix
 ***********************************************************/
 void reveil(){
 	if(nbr_process_sleeping == 0) return;
@@ -221,6 +184,12 @@ void reveil(){
 	}
 }
 
+/**********************************************************
+** Ordonnanceur
+** Reveil les processus qui peuvent être reveiller en premier lieu
+** puis renvoie le premier process disponible
+***********************************************************/
+
 PSW ordonnanceur(PSW m){
 	reveil();
 
@@ -235,6 +204,10 @@ PSW ordonnanceur(PSW m){
 	return process[current_process].cpu;
 }
 
+/**********************************************************
+** Creer un nouveau thread
+***********************************************************/
+
 PSW new_thread(PSW m){
 	int index = find_first_empty();
 	printf("Thread créé : %d\n", index);
@@ -248,8 +221,12 @@ PSW new_thread(PSW m){
 
 	nbr_process_alive++;
 
-	return m;
+	return ordonnanceur(m);
 }
+
+/**********************************************************
+** Endort le thread courrant
+***********************************************************/
 
 PSW send_thread_to_sleep(PSW m){
 	printf("Go to sleep current process %d\n", current_process);
@@ -261,6 +238,9 @@ PSW send_thread_to_sleep(PSW m){
 	return ordonnanceur(m);
 }
 
+/**********************************************************
+** Simule une frappe au clavier
+***********************************************************/
 void frappe_clavier(){
 
 	if(nbr_in_getchar != 0){
@@ -278,6 +258,10 @@ void frappe_clavier(){
 	tampon = caractere;
 }
 
+/**********************************************************
+** Appel système GETCHAR
+***********************************************************/
+
 PSW my_getchar(PSW m){
 	printf("SYSC_GETCHAR\n");
 
@@ -293,6 +277,10 @@ PSW my_getchar(PSW m){
 	}
 }
 
+
+/**********************************************************
+** Affichage système FORK
+***********************************************************/
 
 PSW my_fork(PSW m){
 	printf("SYSC_FORK\n");
@@ -318,21 +306,29 @@ PSW my_fork(PSW m){
 	return ordonnanceur(m);
 }
 
+/**********************************************************
+** Appel systeme EXIT
+***********************************************************/
+
 PSW my_exit(PSW m){
 	printf("SYSC_EXIT : End of process\n");
 	process[current_process].state = EMPTY;
 	nbr_process_alive--;
-    nbr_process--;
+  nbr_process--;
 
 	return ordonnanceur(m);
 }
 
+/**********************************************************
+** Affichage registre DR
+***********************************************************/
+
 PSW system_SYSC(PSW m){
 	switch(m.RI.ARG){
 		case SYSC_EXIT:
-			return my_exit(m);
+      return my_exit(m);
 		case SYSC_PUTI:
-			printf("SYSC_PUTI : R%d = %d\n", m.RI.i, m.DR[m.RI.i]);
+      printf("SYSC_PUTI : R%d = %d\n", m.RI.i, m.DR[m.RI.i]);
 			break;
 		case SYSC_NEW_THREAD:
 			return new_thread(m);

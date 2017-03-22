@@ -91,9 +91,10 @@ struct {
 } process[MAX_PROCESS];        /* table des processus      */
 
 extern int current_process;    /* num du processus courant  */
-extern int nbr_process_alive;
-extern int nbr_process_sleeping;
-extern int nbr_process;
+extern int nbr_process_alive; /* nombre de processus dans l'état READY */
+extern int nbr_process_sleeping; /* nombre de processus dans l'état SLEEP */
+extern int nbr_in_getchar; /* nombre de processus dans l'état GETCHAR */
+extern int nbr_process; /* nombre de processus en tout ( etat confondu ) */
 /**********************************************************
 ** implanter une instruction en memoire
 ***********************************************************/
