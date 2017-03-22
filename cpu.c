@@ -65,33 +65,70 @@ PSW cpu_CMP(PSW m) {
 }
 
 
+/**********************************************************
+** instruction de saut avec condition,
+** si l'accumulateur est superieur a 0
+** alors place le curseur d'instruction à la ligne de la valeur
+** de l'argument de l'instruction
+***********************************************************/
+
 PSW cpu_IFGT(PSW m) {
 	if(m.AC > 0) m.PC = m.RI.ARG;
 	else m.PC += 1;
 	return m;
 }
 
+
+/**********************************************************
+** instruction vide
+** instruction qui ne fait, rien ,
+** elle va juste à la ligne d'instruction suivante
+***********************************************************/
+
 PSW cpu_NOP(PSW m) {
 	m.PC += 1;
 	return m;
 }
+
+/**********************************************************
+** instruction de saut,
+** se déplace a la ligne d'instruction de l'argument
+** de l'instruction jump
+***********************************************************/
 
 PSW cpu_JUMP(PSW m) {
 	m.PC = m.RI.ARG;
 	return m;
 }
 
+
+/**********************************************************
+** instruction HALT,
+** marque la fin du processus
+** en mettant une interruption HALT dans celui-çi
+***********************************************************/
+
 PSW cpu_HALT(PSW m) {
 	m.IN = INT_HALT;
-	//m.PC += 1;
 	return m;
 }
+
+/**********************************************************
+** instruction syscall
+** met l'interruption sysc dans le processus
+** et se place à la ligne d'instruction suivante
+***********************************************************/
 
 PSW cpu_SYSC(PSW m){
 	m.IN = INT_SYSC;
 	m.PC += 1;
 	return m;
 }
+
+
+/**********************************************************
+** instruction LOAD
+***********************************************************/
 
 PSW cpu_LOAD(PSW m){
 	m.AC = m.DR[m.RI.j] + m.RI.ARG;
@@ -106,6 +143,10 @@ PSW cpu_LOAD(PSW m){
 	m.PC += 1;
 	return m;
 }
+
+/**********************************************************
+** instruction STORE
+***********************************************************/
 
 PSW cpu_STORE(PSW m){
 	m.AC = m.DR[m.RI.j] + m.RI.ARG;
@@ -127,14 +168,14 @@ PSW cpu_STORE(PSW m){
 
 PSW cpu(PSW m) {
 	for(int i = 0 ; i < CPU_CLOCK ; i++){
-			/*** lecture et decodage de l'instruction ***/
+		/*** lecture et decodage de l'instruction ***/
 		if (m.PC < 0 || m.PC >= m.SS) {
 			m.IN = INT_SEGV;
 			return (m);
 		}
 
 		m.RI = decode_instruction(mem[m.PC + m.SB]);
-		//printf("INSTRUCTION = %d\n", m.RI.OP);
+
 		/*** execution de l'instruction ***/
 		switch (m.RI.OP) {
 		case INST_ADD:
