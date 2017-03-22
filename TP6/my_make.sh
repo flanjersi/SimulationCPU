@@ -6,3 +6,4 @@ fi
 name=$(basename "$1" .c)
 gcc -W -Wall -std=c99 $name.c -o $name -lpthread
 ./$name
+rm $name
