@@ -37,9 +37,14 @@ qui vous donne l'adresse physique du bloc courant.
 
 void sgf_read_bloc(OFILE* file, int nubloc)
 {
-  int adr;
-    
-  panic("%s: ligne %d: fonction non terminee", __FILE__, __LINE__);
+    int adr;
+    assert(nubloc < (file->length + BLOCK_SIZE - 1) / BLOCK_SIZE);
+    adr = file->first;
+    while (nubloc-- > 0) {
+        assert(adr > 0);
+        adr = get_fat(adr);
+    }
+    read_block(adr, &file->buffer);
 }
 
 
@@ -233,6 +238,7 @@ Fermer un fichier ouvert.
 
 void sgf_close(OFILE* file)
 {
+  
   printf("%s: ligne %d: fonction non terminee", __FILE__, __LINE__);
 }
 

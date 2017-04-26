@@ -25,6 +25,7 @@ int main() {
 	list_directory();
 
 	file = sgf_open("essai.txt", READ_MODE);
+	
 	while ((c = sgf_getc(file)) > 0){
 		putchar(c);
 	}
