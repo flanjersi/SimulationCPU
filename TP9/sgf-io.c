@@ -2,7 +2,7 @@
 /*
 **  sgf-io.c
 **
-**  fonctions de lecture/écriture (de caractères et de blocs)
+**  fonctions de lecture/ï¿½criture (de caractï¿½res et de blocs)
 **  dans un fichier ouvert.
 **
 */
@@ -20,229 +20,229 @@
 
 
 /**********************************************************************
- *
- *  FONCTIONS DE LECTURE DANS UN FICHIER
- *
- *********************************************************************/
+*
+*  FONCTIONS DE LECTURE DANS UN FICHIER
+*
+*********************************************************************/
 
 /**********************************************************************
- Lire dans le "buffer" le bloc logique "nubloc" dans le fichier
- ouvert "file".
- 
- ATTENTION: Faites en sorte de ne pas recommencer le chaînage à
-            partir du bloc 0 si cela n'est pas utile. Pour éviter ce
-            parcours vous pouvez ajouter un champ à la structure OFILE
-            qui vous donne l'adresse physique du bloc courant.
- *********************************************************************/
+Lire dans le "buffer" le bloc logique "nubloc" dans le fichier
+ouvert "file".
+
+ATTENTION: Faites en sorte de ne pas recommencer le chaï¿½nage ï¿½
+partir du bloc 0 si cela n'est pas utile. Pour ï¿½viter ce
+parcours vous pouvez ajouter un champ ï¿½ la structure OFILE
+qui vous donne l'adresse physique du bloc courant.
+*********************************************************************/
 
 void sgf_read_bloc(OFILE* file, int nubloc)
-    {
-    int adr;
-    
-    panic("%s: ligne %d: fonction non terminee", __FILE__, __LINE__);
-    }
+{
+  int adr;
+
+  panic("%s: ligne %d: fonction non terminee", __FILE__, __LINE__);
+}
 
 
 /**********************************************************************
- Lire un caractère dans un fichier ouvert. Cette fonction renvoie
- -1 si elle trouve la fin du fichier.
- *********************************************************************/
+Lire un caractï¿½re dans un fichier ouvert. Cette fonction renvoie
+-1 si elle trouve la fin du fichier.
+*********************************************************************/
 
 int sgf_getc(OFILE* file)
-    {
-    int c;
-    
-    assert (file->mode == READ_MODE);
-    
-    /* détecter la fin de fichier */
-    if (file->ptr >= file->length)
-        return (-1);
+{
+  int c;
 
-    /* si le buffer est vide, le remplir */
-    if ((file->ptr % BLOCK_SIZE) == 0)
-        {
-        sgf_read_bloc(file, file->ptr / BLOCK_SIZE);
-        }
-    
-    c = file->buffer[ (file->ptr % BLOCK_SIZE) ];
-    file->ptr ++;
-    return (c);
-    }
+  assert (file->mode == READ_MODE);
+
+  /* dï¿½tecter la fin de fichier */
+  if (file->ptr >= file->length)
+  return (-1);
+  
+  /* si le buffer est vide, le remplir */
+  if ((file->ptr % BLOCK_SIZE) == 0)
+  {
+    sgf_read_bloc(file, file->ptr / BLOCK_SIZE);
+  }
+
+  c = file->buffer[ (file->ptr % BLOCK_SIZE) ];
+  file->ptr ++;
+  return (c);
+}
 
 
-
-/**********************************************************************
- *
- *  FONCTIONS D'ECRITURE DANS UN FICHIER
- *
- *********************************************************************/
 
 /**********************************************************************
- Ajouter le bloc contenu dans le tampon au fichier ouvert décrit
- par "f".
- *********************************************************************/
+*
+*  FONCTIONS D'ECRITURE DANS UN FICHIER
+*
+*********************************************************************/
+
+/**********************************************************************
+Ajouter le bloc contenu dans le tampon au fichier ouvert dï¿½crit
+par "f".
+*********************************************************************/
 
 void sgf_append_block(OFILE* f)
-    {
-    TBLOCK b;
-    int adr;
+{
+  TBLOCK b;
+  int adr;
 
-    panic("%s: ligne %d: fonction non terminee", __FILE__, __LINE__);
-    }
+  panic("%s: ligne %d: fonction non terminee", __FILE__, __LINE__);
+}
 
 
 /**********************************************************************
- Ecrire le caractère "c" dans le fichier ouvert décrit par "file".
- *********************************************************************/
+Ecrire le caractï¿½re "c" dans le fichier ouvert dï¿½crit par "file".
+*********************************************************************/
 
 void sgf_putc(OFILE* file, char  c)
-    {
-    assert (file->mode == WRITE_MODE);
+{
+  assert (file->mode == WRITE_MODE);
 
-    panic("%s: ligne %d: fonction non terminee", __FILE__, __LINE__);
-    }
+  panic("%s: ligne %d: fonction non terminee", __FILE__, __LINE__);
+}
 
 
 /**********************************************************************
- Écrire la chaîne de caractère "s" dans un fichier ouvert en écriture
- décrit par "file".
- *********************************************************************/
+ï¿½crire la chaï¿½ne de caractï¿½re "s" dans un fichier ouvert en ï¿½criture
+dï¿½crit par "file".
+*********************************************************************/
 
 void sgf_puts(OFILE* file, char* s)
-    {
-    assert (file->mode == WRITE_MODE);
-    
-    for (; (*s != '\0'); s++) {
-        sgf_putc(file, *s);
-        }
-    }
+{
+  assert (file->mode == WRITE_MODE);
+
+  for (; (*s != '\0'); s++) {
+    sgf_putc(file, *s);
+  }
+}
 
 
 
 /**********************************************************************
- *
- *  FONCTIONS D'OUVERTURE, DE FERMETURE ET DE DESTRUCTION.
- *
- *********************************************************************/
+*
+*  FONCTIONS D'OUVERTURE, DE FERMETURE ET DE DESTRUCTION.
+*
+*********************************************************************/
 
 /************************************************************
- Détruire un fichier.
- ************************************************************/
+Dï¿½truire un fichier.
+************************************************************/
 
 void sgf_remove(int  adr_inode)
-    {
-    TBLOCK b;
-    int adr, k;
-    
-    printf("%s: ligne %d: fonction non terminee", __FILE__, __LINE__);
-    }
+{
+  TBLOCK b;
+  int adr, k;
+
+  printf("%s: ligne %d: fonction non terminee", __FILE__, __LINE__);
+}
 
 
 /************************************************************
- Ouvrir un fichier en écriture seulement (NULL si échec).
- ************************************************************/
+Ouvrir un fichier en ï¿½criture seulement (NULL si ï¿½chec).
+************************************************************/
 
 static  OFILE*  sgf_open_write(const char* nom)
-    {
-    int inode, oldinode;
-    OFILE* file;
-    TBLOCK b;
+{
+  int inode, oldinode;
+  OFILE* file;
+  TBLOCK b;
 
-    /* Rechercher un bloc libre sur disque */
-    inode = alloc_block();
-    assert (inode >= 0);
+  /* Rechercher un bloc libre sur disque */
+  inode = alloc_block();
+  assert (inode >= 0);
 
-    /* Allouer une structure OFILE */
-    file = malloc(sizeof(struct OFILE));
-    if (file == NULL) return (NULL);
-    
-    /* préparer un inode vers un fichier vide */
-    b.inode.length = 0;
-    b.inode.first  = FAT_EOF;
-    b.inode.last   = FAT_EOF;
+  /* Allouer une structure OFILE */
+  file = malloc(sizeof(struct OFILE));
+  if (file == NULL) return (NULL);
 
-    /* sauver ce inode */
-    write_block(inode, &b.data);
-    set_fat(inode, FAT_INODE);
+  /* prï¿½parer un inode vers un fichier vide */
+  b.inode.length = 0;
+  b.inode.first  = FAT_EOF;
+  b.inode.last   = FAT_EOF;
 
-    /* mettre a jour le repertoire */
-    oldinode = add_inode(nom, inode);
-    if (oldinode > 0) sgf_remove(oldinode);
-    
-    file->length  = 0;
-    file->first   = FAT_EOF;
-    file->last    = FAT_EOF;
-    file->inode   = inode;
-    file->mode    = WRITE_MODE;
-    file->ptr     = 0;
+  /* sauver ce inode */
+  write_block(inode, &b.data);
+  set_fat(inode, FAT_INODE);
 
-    return (file);
-    }
+  /* mettre a jour le repertoire */
+  oldinode = add_inode(nom, inode);
+  if (oldinode > 0) sgf_remove(oldinode);
+
+  file->length  = 0;
+  file->first   = FAT_EOF;
+  file->last    = FAT_EOF;
+  file->inode   = inode;
+  file->mode    = WRITE_MODE;
+  file->ptr     = 0;
+
+  return (file);
+}
 
 
 /************************************************************
- Ouvrir un fichier en lecture seulement (NULL si échec).
- ************************************************************/
+Ouvrir un fichier en lecture seulement (NULL si ï¿½chec).
+************************************************************/
 
 static  OFILE*  sgf_open_read(const char* nom)
-    {
-    int inode;
-    OFILE* file;
-    TBLOCK b;
-    
-    /* Chercher le fichier dans le répertoire */
-    inode = find_inode(nom);
-    if (inode < 0) return (NULL);
-    
-    /* lire le inode */
-    read_block(inode, &b.data);
-    
-    /* Allouer une structure OFILE */
-    file = malloc(sizeof(struct OFILE));
-    if (file == NULL) return (NULL);
-    
-    file->length  = b.inode.length;
-    file->first   = b.inode.first;
-    file->last    = b.inode.last;
-    file->inode   = inode;
-    file->mode    = READ_MODE;
-    file->ptr     = 0;
-    
-    return (file);
-    }
+{
+  int inode;
+  OFILE* file;
+  TBLOCK b;
+
+  /* Chercher le fichier dans le rï¿½pertoire */
+  inode = find_inode(nom);
+  if (inode < 0) return (NULL);
+
+  /* lire le inode */
+  read_block(inode, &b.data);
+
+  /* Allouer une structure OFILE */
+  file = malloc(sizeof(struct OFILE));
+  if (file == NULL) return (NULL);
+
+  file->length  = b.inode.length;
+  file->first   = b.inode.first;
+  file->last    = b.inode.last;
+  file->inode   = inode;
+  file->mode    = READ_MODE;
+  file->ptr     = 0;
+
+  return (file);
+}
 
 
 /************************************************************
- Ouvrir un fichier (NULL si échec).
- ************************************************************/
+Ouvrir un fichier (NULL si ï¿½chec).
+************************************************************/
 
 OFILE* sgf_open (const char* nom, int mode)
-    {
-    switch (mode)
-        {
-        case READ_MODE:  return sgf_open_read(nom);
-        case WRITE_MODE: return sgf_open_write(nom);
-        default:         return (NULL);
-        }
-    }
+{
+  switch (mode)
+  {
+    case READ_MODE:  return sgf_open_read(nom);
+    case WRITE_MODE: return sgf_open_write(nom);
+    default:         return (NULL);
+  }
+}
 
 
 /************************************************************
- Fermer un fichier ouvert.
- ************************************************************/
+Fermer un fichier ouvert.
+************************************************************/
 
 void sgf_close(OFILE* file)
-    {
-    printf("%s: ligne %d: fonction non terminee", __FILE__, __LINE__);
-    }
+{
+  printf("%s: ligne %d: fonction non terminee", __FILE__, __LINE__);
+}
 
 
 /**********************************************************************
- initialiser le SGF
- *********************************************************************/
+initialiser le SGF
+*********************************************************************/
 
 void init_sgf (void)
-    {
-    init_sgf_disk();
-    init_sgf_fat();
-    }
+{
+  init_sgf_disk();
+  init_sgf_fat();
+}

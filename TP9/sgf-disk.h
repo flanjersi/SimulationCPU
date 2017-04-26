@@ -11,36 +11,39 @@
 
 /**********************************************************************
  *
- *  Définition d'un bloc. Le bloc est l'unité élémentaire
- *  d'entrée/sortie sur les supports. Le matériel est capable de
- *  lire et d'écrire un bloc sur l'unité.
+ *  Dï¿½finition d'un bloc. Le bloc est l'unitï¿½ ï¿½lï¿½mentaire
+ *  d'entrï¿½e/sortie sur les supports. Le matï¿½riel est capable de
+ *  lire et d'ï¿½crire un bloc sur l'unitï¿½.
  *
  *********************************************************************/
- 
+
 #define BLOCK_SIZE              (128)    /* 128 octets */
 
 typedef char BLOCK[ BLOCK_SIZE ];
 
 
 /************************************************************
- Récupérer la taille du disque (en blocs)
+ Rï¿½cupï¿½rer la taille du disque (en blocs)
  ***********************************************************/
- 
+
 int get_disk_size();
 
+char* get_disk_name();
+
+
 /************************************************************
- Primitives de bas niveau pour lire ou écrire un bloc sur
+ Primitives de bas niveau pour lire ou ï¿½crire un bloc sur
  disque. ATTENTION: pour simplifier, les E/S sont synchrones.
- En d'autres termes, ces procédures ATTENDENT la fin de l'E/S
+ En d'autres termes, ces procï¿½dures ATTENDENT la fin de l'E/S
  ***********************************************************/
- 
+
 void read_block (int n, BLOCK* b);
 void write_block (int n, BLOCK* b);
 
 /************************************************************
- initialisation et découverte du disque
+ initialisation et dï¿½couverte du disque
  ***********************************************************/
- 
+
 void init_sgf_disk (void);
 
 

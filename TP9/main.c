@@ -18,18 +18,17 @@
 int main() {
 	OFILE* file;
 	int c;
-	
+
 	init_sgf();
-	
+
 	printf("\nListing du disque\n\n");
 	list_directory();
-	
-	file = sgf_open("essai.txt", READ_MODE);
-	while ((c = sgf_getc(file)) > 0) {
-		putchar(c);
-		}
-	sgf_close(file);
-	
-	return (EXIT_SUCCESS);
-	}
 
+	file = sgf_open("essai.txt", READ_MODE);
+	while ((c = sgf_getc(file)) > 0){
+		putchar(c);
+	}
+	sgf_close(file);
+
+	return (EXIT_SUCCESS);
+}
