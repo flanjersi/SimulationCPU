@@ -177,7 +177,7 @@ Lister les fichiers du r�pertoire avec leur taille.
 
 void list_directory (void)
 {
-    TBLOCK b, b2;
+    TBLOCK b;
     int adr;
     int j;
 
