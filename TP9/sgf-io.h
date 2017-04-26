@@ -4,64 +4,66 @@
 
 
 /**********************************************************************
- *
- *  La structure OFILE décrit un fichier ouvert.
- *
- *  Cette structure comporte des informations sur l'implantation
- *  physique du fichier ainsi que des champs destinés à décrire
- *  l'état du fichier.
- *
- *********************************************************************/
+*
+*  La structure OFILE dï¿½crit un fichier ouvert.
+*
+*  Cette structure comporte des informations sur l'implantation
+*  physique du fichier ainsi que des champs destinï¿½s ï¿½ dï¿½crire
+*  l'ï¿½tat du fichier.
+*
+*********************************************************************/
 
 #define READ_MODE       (0)
 #define WRITE_MODE      (1)
 
 struct OFILE            /* "Un fichier ouvert"                  */
-    {                   /* ------------------------------------ */
+{                   /* ------------------------------------ */
     int   length;       /* taille du fichier (en octets)        */
     int   first;        /* adresse du premier bloc logique      */
     int   last;         /* adresse du dernier bloc logique      */
     int   inode;        /* adresse de l'INODE (descripteur)     */
-    int   ptr;          /* n° logique du prochain caractère     */
+    int   ptr;          /* nï¿½ logique du prochain caractï¿½re     */
 
     int   mode;         /* READ_MODE ou WRITE_MODE              */
     BLOCK buffer;       /* buffer contenant le bloc courant     */
-    };
+};
 
 typedef struct OFILE OFILE;
 
 /**********************************************************************
- *
- *  ROUTINES DE GESTION DES E/S VERS DES FICHIERS OUVERTS (OFILE)
- *
- *********************************************************************/
+*
+*  ROUTINES DE GESTION DES E/S VERS DES FICHIERS OUVERTS (OFILE)
+*
+*********************************************************************/
 
 /************************************************************
- *  Ecrire un caractère/une chaîne sur un fichier ouvert en
- *  écriture.
- ************************************************************/
+*  Ecrire un caractï¿½re/une chaï¿½ne sur un fichier ouvert en
+*  ï¿½criture.
+************************************************************/
 
-    void sgf_puts (OFILE* f, char *s);
-    void sgf_putc (OFILE* f, char  c);
-
-/************************************************************
- *  Lire un caractère sur un fichier ouvert en lecture.
- *  renvoyer -1 en cas de fin de fichier.
- ************************************************************/
-
-    int sgf_getc (OFILE* f);
+void sgf_puts (OFILE* f, char *s);
+void sgf_putc (OFILE* f, char  c);
 
 /************************************************************
- *  Ouvrir/Fermer/Partager un fichier.
- ************************************************************/
+*  Lire un caractï¿½re sur un fichier ouvert en lecture.
+*  renvoyer -1 en cas de fin de fichier.
+************************************************************/
 
-    OFILE* sgf_open  (const char *nom, int mode);
-    void   sgf_close (OFILE* f);
+int sgf_getc (OFILE* f);
+
+/************************************************************
+*  Ouvrir/Fermer/Partager un fichier.
+************************************************************/
+
+OFILE* sgf_open  (const char *nom, int mode);
+void   sgf_close (OFILE* f);
 
 /**********************************************************************
- * Initialiser le Système de Gestion de Fichiers.
- *********************************************************************/
+* Initialiser le Systï¿½me de Gestion de Fichiers.
+*********************************************************************/
 
-    void init_sgf ();
+void init_sgf ();
+
+int sgf_seek(OFILE* f, int pos);
 
 #endif
