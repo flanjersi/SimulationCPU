@@ -37,9 +37,14 @@ qui vous donne l'adresse physique du bloc courant.
 
 void sgf_read_bloc(OFILE* file, int nubloc)
 {
-  int adr;
-
-  panic("%s: ligne %d: fonction non terminee", __FILE__, __LINE__);
+    int adr;
+    assert(nubloc < (file->length + BLOCK_SIZE - 1) / BLOCK_SIZE);
+    adr = file->first;
+    while (nubloc-- > 0) {
+        assert(adr > 0);
+        adr = get_fat(adr);
+    }
+    read_block(adr, &file->buffer);
 }
 
 
@@ -57,7 +62,7 @@ int sgf_getc(OFILE* file)
   /* d�tecter la fin de fichier */
   if (file->ptr >= file->length)
   return (-1);
-  
+
   /* si le buffer est vide, le remplir */
   if ((file->ptr % BLOCK_SIZE) == 0)
   {
