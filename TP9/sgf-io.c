@@ -87,12 +87,27 @@ Ajouter le bloc contenu dans le tampon au fichier ouvert d�crit
 par "f".
 *********************************************************************/
 
-void sgf_append_block(OFILE* f)
+int sgf_append_block(OFILE* f)
 {
     TBLOCK b;
     int adr;
-
-    panic("%s: ligne %d: fonction non terminee", __FILE__, __LINE__);
+    adr = alloc_block();
+    if (adr < 0) return (-1);
+    write_block(adr, & f->buffer );
+    set_fat(adr, FAT_EOF);
+    if (f->first == FAT_EOF) {
+        f->first = adr;
+        f->last = adr;
+    }
+    else {
+        set_fat(f->last, adr);
+        f->last = adr;
+    }
+    b.inode.length = f->ptr;
+    b.inode.first = f->first;
+    b.inode.last = f->last;
+    write_block(f->inode, &b.data);
+    return (0);
 }
 
 
@@ -104,7 +119,14 @@ void sgf_putc(OFILE* file, char  c)
 {
     assert (file->mode == WRITE_MODE);
 
-    panic("%s: ligne %d: fonction non terminee", __FILE__, __LINE__);
+    if(file->ptr%BLOCK_SIZE == 0 && file->ptr > 0){
+        sgf_append_block(file);
+    }
+
+    file->buffer[file->ptr%BLOCK_SIZE] = c;
+    file->ptr++;
+    file->length += sizeof(char);
+    printf("%c",c);
 }
 
 
@@ -238,7 +260,7 @@ Fermer un fichier ouvert.
 
 void sgf_close(OFILE* file)
 {
-    printf("%s: ligne %d: fonction non terminee", __FILE__, __LINE__);
+    // printf("%s: ligne %d: fonction non terminee", __FILE__, __LINE__);
 }
 
 
@@ -252,11 +274,17 @@ void init_sgf (void)
     init_sgf_fat();
 }
 
+/**********************************************************************
+Accès direct en lecture
+*********************************************************************/
+
 int sgf_seek(OFILE* f, int pos){
-    if(f == NULL) return -1;
-    f->ptr += pos;
-    if(f->ptr % BLOCK_SIZE != 0){
-        read_block(adr, &file->buffer);
-    }
+    if(f == NULL || f->length < pos) return -1;
+
+    f->ptr         = pos;
+    int curr_block = f->ptr / BLOCK_SIZE;
+
+    sgf_read_bloc(f, curr_block);
+
     return 0;
 }
