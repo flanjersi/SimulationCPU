@@ -24,19 +24,30 @@ int main() {
 	printf("\nListing du disque\n\n");
 	list_directory();
   int i = 1;
+	file = sgf_open("essai.txt", WRITE_MODE);
+
+	sgf_puts(file, "Ceci est un petit texte qui occupe\n");
+	sgf_puts(file, "quelques blocs sur ce disque fictif.\n");
+	sgf_puts(file, "Le bloc faisant 128 octets, il faut\n");
+	sgf_puts(file, "que je remplisse pour utiliser\n");
+	sgf_puts(file, "plusieurs blocs.\n");
+	sgf_close(file);
+
 	file = sgf_open("essai.txt", READ_MODE);
+	while ((c = sgf_getc(file)) > 0){
+		putchar(c);
+	}
+	printf("\n");
 
-  while(sgf_seek(file, 8 * i) != -1){
-      char c = sgf_getc(file);
-      putchar(c);
-      putchar(' ');
-      i++;
-  }
-  putchar('\n');
-
-	// while ((c = sgf_getc(file)) > 0){
-	// 	putchar(c);
+	//
+	// while(sgf_seek(file, 8 * i) != -1){
+	//     char c = sgf_getc(file);
+	//     putchar(c);
+	//     putchar(' ');
+	//     i++;
 	// }
+	// putchar('\n');
+
 	sgf_close(file);
 
 	return (EXIT_SUCCESS);

@@ -37,13 +37,19 @@ qui vous donne l'adresse physique du bloc courant.
 
 void sgf_read_bloc(OFILE* file, int nubloc)
 {
+    int tmp_nubloc = nubloc;
     int adr;
     assert(nubloc < (file->length + BLOCK_SIZE - 1) / BLOCK_SIZE);
+
     adr = file->first;
-    while (nubloc-- > 0) {
-        assert(adr > 0);
+
+    while (tmp_nubloc > 0) {
         adr = get_fat(adr);
+
+        assert(adr > 0);
+        tmp_nubloc--;
     }
+
     read_block(adr, &file->buffer);
 }
 
@@ -61,7 +67,7 @@ int sgf_getc(OFILE* file)
 
     /* d�tecter la fin de fichier */
     if (file->ptr >= file->length)
-    return (-1);
+      return (-1);
 
     /* si le buffer est vide, le remplir */
     if ((file->ptr % BLOCK_SIZE) == 0)
@@ -90,11 +96,13 @@ par "f".
 int sgf_append_block(OFILE* f)
 {
     TBLOCK b;
-    int adr;
-    adr = alloc_block();
+    int adr = alloc_block();
+
     if (adr < 0) return (-1);
+
     write_block(adr, & f->buffer );
     set_fat(adr, FAT_EOF);
+
     if (f->first == FAT_EOF) {
         f->first = adr;
         f->last = adr;
@@ -103,10 +111,13 @@ int sgf_append_block(OFILE* f)
         set_fat(f->last, adr);
         f->last = adr;
     }
+
     b.inode.length = f->ptr;
     b.inode.first = f->first;
     b.inode.last = f->last;
+
     write_block(f->inode, &b.data);
+
     return (0);
 }
 
@@ -126,7 +137,8 @@ void sgf_putc(OFILE* file, char  c)
     file->buffer[file->ptr%BLOCK_SIZE] = c;
     file->ptr++;
     file->length += sizeof(char);
-    printf("%c",c);
+
+    // printf("Caractère ecrit : %c\n",c);
 }
 
 
