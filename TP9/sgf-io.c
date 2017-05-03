@@ -173,7 +173,14 @@ void sgf_remove(int  adr_inode)
     TBLOCK b;
     int adr, k;
 
-    printf("%s: ligne %d: fonction non terminee", __FILE__, __LINE__);
+	read_block(adr_inode,&b.data);
+	adr=k=b.inode.first;
+	while(adr != FAT_EOF ){
+		k = adr;
+		adr = get_fat(adr);
+		set_fat(k,FAT_FREE);
+	}
+	set_fat(adr_inode,FAT_FREE);
 }
 
 
@@ -273,16 +280,16 @@ Fermer un fichier ouvert.
 void sgf_close(OFILE* file)
 {
     /*TBLOCK t;*/
-    if(file->mode == WRITE_MODE || file->mode == APPEND_MODE){
+    if(file->mode == WRITE_MODE ){ //|| file->mode == APPEND_MODE){
         if((file->ptr%BLOCK_SIZE)!=0){
             if(sgf_append_block(file) < 0){
                 perror("SGF_CLOSE : Probleme sgf_append_block\n");
-                return -1;
+                return;
             }
         }
     }
     free(file);
-    return 0;
+    return;
 
     /*fonction close() avant la correction du TD
     if(file->first < 0){
