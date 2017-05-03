@@ -270,3 +270,14 @@ void create_empty_fat ()
 
   free(tab);
 }
+
+
+void get_free_fat(){
+    int free_blocks = 0;
+    for(int i = 0; i < fat.disk_size; ++i) {
+        if(fat.tab[i] == -1) {
+            free_blocks++;
+        }
+    }
+    printf("free_blocks: %d\ndisk_size: %d\n", free_blocks, fat.disk_size);
+}

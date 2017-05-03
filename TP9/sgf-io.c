@@ -183,8 +183,10 @@ void sgf_remove(int  adr_inode)
 		adr = get_fat(adr);
 		set_fat(k,FAT_FREE);
 	}
-    
+
 	set_fat(adr_inode,FAT_FREE);
+
+    get_free_fat();
 }
 
 
