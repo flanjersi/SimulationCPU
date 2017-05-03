@@ -274,8 +274,8 @@ void create_empty_fat ()
 
 void get_free_fat(){
     int free_blocks = 0;
-    for(int i = 0; i < fat.disk_size; ++i) {
-        if(fat.tab[i] == -1) {
+    for(int i = 0; i < fat.disk_size; i++) {
+        if(fat.tab[i] == FAT_FREE) {
             free_blocks++;
         }
     }
