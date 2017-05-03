@@ -79,7 +79,7 @@ static void create_memory_fat (void)
 
   k = fat.fat_size_in_blocks + ADR_BLOCK_FAT;
   for(; (k < fat.disk_size); k++)
-  fat.tab[k] = FAT_FREE;
+    fat.tab[k] = FAT_FREE;
 }
 
 
