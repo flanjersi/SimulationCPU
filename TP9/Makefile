@@ -1,5 +1,5 @@
 
-CFLAGS=-ansi -Wall
+CFLAGS=-ansi -Wall -std=c99
 CSRC=$(wildcard sgf*.c)
 OBJ=$(CSRC:.c=.o)
 HDR=$(CSRC:.c=.h)
@@ -27,4 +27,3 @@ zip:
 	@rm -f $(OBJ)
 	@rm -f ../mini-sgf.zip
 	@cd .. ; zip -r mini-sgf.zip mini-sgf/
-

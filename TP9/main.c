@@ -23,11 +23,19 @@ int main() {
 
 	printf("\nListing du disque\n\n");
 	list_directory();
-
+    int i = 1;
 	file = sgf_open("essai.txt", READ_MODE);
-	while ((c = sgf_getc(file)) > 0){
-		putchar(c);
-	}
+    while(sgf_seek(file, 8 * i) != -1){
+        char c = sgf_getc(file);
+        putchar(c);
+        putchar(' ');
+        i++;
+    }
+    putchar('\n');
+
+	// while ((c = sgf_getc(file)) > 0){
+	// 	putchar(c);
+	// }
 	sgf_close(file);
 
 	return (EXIT_SUCCESS);
