@@ -174,12 +174,16 @@ void sgf_remove(int  adr_inode)
     int adr, k;
 
 	read_block(adr_inode,&b.data);
-	adr=k=b.inode.first;
+
+    adr = b.inode.first;
+    k = b.inode.first;
+
 	while(adr != FAT_EOF ){
 		k = adr;
 		adr = get_fat(adr);
 		set_fat(k,FAT_FREE);
 	}
+    
 	set_fat(adr_inode,FAT_FREE);
 }
 
@@ -279,8 +283,7 @@ Fermer un fichier ouvert.
 
 void sgf_close(OFILE* file)
 {
-    /*TBLOCK t;*/
-    if(file->mode == WRITE_MODE ){ //|| file->mode == APPEND_MODE){
+    if(file->mode == WRITE_MODE ){
         if((file->ptr%BLOCK_SIZE)!=0){
             if(sgf_append_block(file) < 0){
                 perror("SGF_CLOSE : Probleme sgf_append_block\n");
@@ -290,29 +293,6 @@ void sgf_close(OFILE* file)
     }
     free(file);
     return;
-
-    /*fonction close() avant la correction du TD
-    if(file->first < 0){
-        file->first = alloc_block();
-        file->last = file->first;
-        set_fat(file->last,-4);
-
-
-        read_block(file->inode,&t.data);
-        t.inode.first = file->first;
-        t.inode.last = file->last;
-        t.inode.length = file->length;
-        printf("***************FCT CLOSE***************\n");
-        printf("first=%d, last=%d, inode=%d\n inode.first=%d, inode.last=%d, inode.lg=%d\n",file->first,file->last,file->inode,t.inode.first,t.inode.last,t.inode.length);
-        printf("olol %d\n",get_fat(file->last));
-        printf("***************FCT CLOSE***************\n");
-    }
-
-    write_block(file->last,&file->buffer);
-
-    file = NULL;
-    printf("File closed.\n");
-    */
 }
 
 
