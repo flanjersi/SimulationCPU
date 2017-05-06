@@ -15,6 +15,7 @@
 
 #define READ_MODE       (0)
 #define WRITE_MODE      (1)
+#define APPEND_MODE     (2)
 
 struct OFILE            /* "Un fichier ouvert"                  */
 {                   /* ------------------------------------ */
@@ -23,7 +24,7 @@ struct OFILE            /* "Un fichier ouvert"                  */
     int   last;         /* adresse du dernier bloc logique      */
     int   inode;        /* adresse de l'INODE (descripteur)     */
     int   ptr;          /* n� logique du prochain caract�re     */
-
+    int   current;      /* adresse physique du bloc courant     */
     int   mode;         /* READ_MODE ou WRITE_MODE              */
     BLOCK buffer;       /* buffer contenant le bloc courant     */
 };

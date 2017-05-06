@@ -177,7 +177,7 @@ Lister les fichiers du r�pertoire avec leur taille.
 
 void list_directory (void)
 {
-    TBLOCK b;
+    TBLOCK b, b2;
     int adr;
     int j;
 
@@ -190,10 +190,12 @@ void list_directory (void)
 
     while (adr != FAT_EOF){
         read_block(adr, &b.data);
-        for(j = 0; j < BLOCK_DIR_SIZE; j++)
-            if (b.dir[j].inode > 0)
-                printf("%s\n", b.dir[j].name);
+        for(j = 0; j < BLOCK_DIR_SIZE; j++){
+            if (b.dir[j].inode > 0){
+                read_block(b.dir[j].inode, &b2.data);
+                printf("%s %d\n", b.dir[j].name, b2.inode.length);
+            }
+        }
         adr = get_fat(adr);
     }
-
 }
