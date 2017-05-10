@@ -383,3 +383,51 @@ int sgf_seek(OFILE* file, int pos){
 
     return 0;
 }
+/**********************************************************************
+Écrire une zone de données
+*********************************************************************/
+
+int sgf_write(OFILE* file, char* data, int size) {
+
+    assert(file->mode == WRITE_MODE || file->mode == APPEND_MODE);
+
+    int length_to_write = size;
+    int pos_ptr_in_block, remaining_length_in_block;
+    TBLOCK b;
+
+    while (length_to_write > 0) {
+
+        pos_ptr_in_block = file->ptr % BLOCK_SIZE;
+
+        remaining_length_in_block = BLOCK_SIZE - pos_ptr_in_block;
+
+        if (pos_ptr_in_block == 0) sgf_append_block(file);
+
+        if (length_to_write > remaining_length_in_block) {
+            for(int i = 0 ; i < remaining_length_in_block ; i++){
+                file->buffer[pos_ptr_in_block + i] = data[size - length_to_write + i];
+            }
+
+            file->length += remaining_length_in_block;
+            length_to_write -= remaining_length_in_block;
+        }
+        else {
+            for(int i = 0 ; i < length_to_write ; i++){
+                file->buffer[pos_ptr_in_block + i] = data[size - length_to_write + i];
+            }
+
+            file->length += length_to_write;
+            length_to_write = 0;
+        }
+
+        file->ptr = file->length;
+
+        write_block(file->current, &file->buffer);
+
+        read_block(file->inode, &b.data);
+        b.inode.length = file->length;
+        write_block(file->inode, &b.data);
+    }
+
+    return size;
+}

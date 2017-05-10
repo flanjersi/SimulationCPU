@@ -66,5 +66,6 @@ void   sgf_close (OFILE* f);
 void init_sgf ();
 
 int sgf_seek(OFILE* f, int pos);
+int sgf_write(OFILE* file, char* data, int size);
 
 #endif

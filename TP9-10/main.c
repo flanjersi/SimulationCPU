@@ -61,6 +61,12 @@ void seek_8_file(OFILE* file){
     sgf_close(file);
 }
 
+void final_write_file(OFILE* file){
+    file = sgf_open("essai.txt", WRITE_MODE);
+    sgf_write(file, "Ceci est un petit texte qui occupe quelques blocs sur ce disque fictif. Le bloc faisant 128 octets, il faut que je remplisse pour utiliser plusieurs blocs.", 155);
+    sgf_close(file);
+}
+
 int main() {
     OFILE* file;
     int c;
@@ -83,6 +89,11 @@ int main() {
     printf("\n>> 500 ajouts dans fichier\n");
     empty_file(file);
     mutliple_append_file(file, 500);
+    read_file(file, c);
+
+    printf("\n>> Ecriture final\n");
+    empty_file(file);
+    final_write_file(file);
     read_file(file, c);
 
     printf("\n");
